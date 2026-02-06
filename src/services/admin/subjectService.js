@@ -30,7 +30,7 @@ export const subjectService = {
         }
         const code = await generateSubjectCode()
 
-        const newSubject = await prisma.subject({
+        const newSubject = await prisma.subject.create({
             data: {
                 code: code,
                 name: name.trim(),

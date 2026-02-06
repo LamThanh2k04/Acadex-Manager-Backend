@@ -4,7 +4,7 @@ const generateSubjectCode = async () => {
     let code
     let exist = true
     while(exist) {
-        code = Math.floor(100000 + Math.random() * 900000).toString()
+        code = Math.floor(1000000000 + Math.random() * 9000000000).toString()
         exist = await prisma.subject.findUnique({where : code})
     }
     return code
