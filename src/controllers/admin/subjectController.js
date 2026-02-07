@@ -20,7 +20,7 @@ export const subjectController = {
             const response = responseSuccess(data, "Cập nhật thông tin môn học thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Cập nhật thông tin môn học thất bại")
+            console.error("Cập nhật thông tin môn học thất bại",err)
             next(err)
         }
     },
@@ -31,7 +31,7 @@ export const subjectController = {
             const response = responseSuccess(data, "Cập nhật trạng thái môn học thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Cập nhật trạng thái môn học thất bại")
+            console.error("Cập nhật trạng thái môn học thất bại",err)
             next(err)
         }
     },
@@ -43,7 +43,7 @@ export const subjectController = {
             const response = responseSuccess(data, "Lấy danh sách môn học có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách môn học có phân trang thất bại")
+            console.error("Lấy danh sách môn học có phân trang thất bại",err)
             next(err)
         }
     },
@@ -53,7 +53,7 @@ export const subjectController = {
             const response = responseSuccess(data, "Lấy danh sách môn học thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách môn học thất bại")
+            console.error("Lấy danh sách môn học thất bại",err)
             next(err)
         }
     }

@@ -88,6 +88,9 @@ export const subjectService = {
         const subject = await prisma.subject.findUnique({
             where: { id: Number(subjectId) }
         })
+        if(!subject) {
+            throw new NotFoundException("Không tìm thấy môn học này")
+        }
         const updateSubjectStatus = await prisma.subject.update({
             where: { id: Number(subjectId) },
             data: {

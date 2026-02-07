@@ -8,7 +8,7 @@ export const roomController = {
             const response = responseSuccess(data, "Tạo phòng thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Tạo phòng thất bại")
+            console.error("Tạo phòng thất bại",err)
             next(err)
         }
     },
@@ -19,7 +19,7 @@ export const roomController = {
             const response = responseSuccess(data, "Cập nhật thông tin phòng thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Cập nhật thông tin phòng thất bại")
+            console.error("Cập nhật thông tin phòng thất bại",err)
             next(err)
         }
     },
@@ -30,7 +30,7 @@ export const roomController = {
             const response = responseSuccess(data, "Cập nhật trạng thái phòng thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Cập nhật trạng thái phòng thất bại")
+            console.error("Cập nhật trạng thái phòng thất bại",err)
             next(err)
         }
     },
@@ -43,14 +43,14 @@ export const roomController = {
             const response = responseSuccess(data, "Lấy danh sách phòng có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách phòng có phân trang thất bại")
+            console.error("Lấy danh sách phòng có phân trang thất bại",err)
             next(err)
         }
     },
     getAllRoomsSimple: async (req, res, next) => {
         try {
             const data = await roomService.getAllRoomsSimple()
-            const response = responseSuccess(data, "Lấy danh sách phòng thành công")
+            const response = responseSuccess(data, "Lấy danh sách phòng thành công",err)
             res.status(response.status).json(response)
         } catch (err) {
             console.error("Lấy danh sách phòng thất bại")

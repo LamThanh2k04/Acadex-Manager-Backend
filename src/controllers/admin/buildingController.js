@@ -8,7 +8,7 @@ export const buildingController = {
             const response = responseSuccess(data, "Tạo cơ sở thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Tạo cơ sở thất bại")
+            console.error("Tạo cơ sở thất bại",err)
             next(err)
         }
     },
@@ -19,7 +19,7 @@ export const buildingController = {
             const response = responseSuccess(data, "Cập nhật thông tin cơ sở thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Cập nhật thông tin cơ sở thất bại")
+            console.error("Cập nhật thông tin cơ sở thất bại",err)
             next(err)
         }
     },
@@ -30,7 +30,7 @@ export const buildingController = {
             const response = responseSuccess(data, "Cập nhật trạng thái cơ sở thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Cập nhật trạng thái cơ sở thất bại")
+            console.error("Cập nhật trạng thái cơ sở thất bại",err)
             next(err)
         }
     },
@@ -43,7 +43,7 @@ export const buildingController = {
             const response = responseSuccess(data, "Lấy danh sách cơ sở có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách cơ sở có phân trang thất bại")
+            console.error("Lấy danh sách cơ sở có phân trang thất bại",err)
             next(err)
         }
     },
@@ -53,7 +53,7 @@ export const buildingController = {
             const response = responseSuccess(data, "Lấy danh sách cơ sở thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách cơ sở thất bại")
+            console.error("Lấy danh sách cơ sở thất bại",err)
             next(err)
         }
     }

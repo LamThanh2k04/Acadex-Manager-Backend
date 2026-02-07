@@ -303,11 +303,9 @@ model ProgramSubject {
   updatedAt DateTime    @updatedAt
 
   semesterOrder Int?
-  semesterId    Int?
 
-  program  Program   @relation(fields: [programId], references: [id])
-  subject  Subject   @relation(fields: [subjectId], references: [id])
-  semester Semester? @relation(fields: [semesterId], references: [id])
+  program Program @relation(fields: [programId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
 }
 
 model Subject {
@@ -338,7 +336,6 @@ model Semester {
 
   courseSections         CourseSection[]
   tuitionFees            TuitionFee[]
-  programSubjects        ProgramSubject[]
   studyPauseApplications StudyPauseApplication[]
 }
 
