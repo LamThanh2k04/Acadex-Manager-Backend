@@ -118,8 +118,13 @@ export const subjectService = {
                 where: whereCondition
             })
         ])
+        const formattedSubjects = subjects.map(s => ({
+        ...s,
+        theoryPeriods : Math.round((s.theoryHours * 60) / 50),
+        practicePeriods: Math.round((s.practiceHours * 60) / 50)
+    }))
         return {
-            subjects,
+            subjects : formattedSubjects,
             pagination: {
                 page: Number(page),
                 limit: limit,

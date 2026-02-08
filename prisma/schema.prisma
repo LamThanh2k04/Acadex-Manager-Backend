@@ -138,6 +138,20 @@ enum ChatIntent {
   OTHER
 }
 
+enum Degree {
+  BACHELOR
+  MASTER
+  DOCTOR
+  ASSOCIATE_PROFESSOR
+  PROFESSOR
+}
+
+enum LecturerPosition {
+  LECTURER
+  HEAD_SUBJECT
+  HEAD_DEPARTMENT
+}
+
 model User {
   id          Int       @id @default(autoincrement())
   fullName    String
@@ -170,6 +184,10 @@ model Student {
   id              Int           @id @default(autoincrement())
   userId          Int           @unique
   studentCode     String        @unique
+  personalEmail   String?
+  citizenId       String?       @unique
+  placeOfBirth    String?
+  ethnicity       String?
   admissionYear   Int?
   graduateYear    Int?
   gpa             Float?
@@ -201,16 +219,19 @@ model Student {
 }
 
 model Lecturer {
-  id              Int            @id @default(autoincrement())
-  userId          Int            @unique
-  lecturerCode    String         @unique
-  degree          String?
-  specialization  String?
-  position        String?
-  status          LecturerStatus @default(WORKING)
+  id              Int               @id @default(autoincrement())
+  userId          Int               @unique
+  lecturerCode    String            @unique
+  personalEmail   String?
+  citizenId       String?           @unique
+  placeOfBirth    String?
+  ethnicity       String?
+  degree          Degree?
+  position        LecturerPosition?
+  status          LecturerStatus    @default(WORKING)
   statusUpdatedAt DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   facultyId Int?
   majorId   Int?
@@ -275,6 +296,7 @@ model Class {
 
 model Program {
   id                   Int            @id @default(autoincrement())
+  code                 String         @unique
   trainingLevel        TrainingLevel? @default(BACHELOR)
   educationType        EducationType? @default(FULL_TIME)
   plannedEducationYear Float?
@@ -658,6 +680,7 @@ model NotificationTarget {
 
 model CertificateTemplate {
   id          Int      @id @default(autoincrement())
+  code        String   @unique
   name        String
   description String?
   isActive    Boolean  @default(true)

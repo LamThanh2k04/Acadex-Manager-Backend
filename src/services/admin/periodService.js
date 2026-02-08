@@ -138,8 +138,13 @@ export const periodService = {
                 where: whereCondition
             })
         ])
+        const formattedPeriods = periods.map(p => ({
+            ...p, 
+            startHour :  `${Math.floor(p.startTime / 60)}:${String(p.startTime % 60).padStart(2, "0")}`,
+            endHour : `${Math.floor(p.endTime / 60)}:${String(p.endTime % 60).padStart(2, "0")}`,
+        }))
         return {
-            periods,
+            periods : formattedPeriods,
             pagination: {
                 page: Number(page),
                 limit: limit,
@@ -159,8 +164,13 @@ export const periodService = {
                 endTime: true
             }
         })
+           const formattedPeriods = periods.map(p => ({
+            ...p, 
+            startHour :  `${Math.floor(p.startTime / 60)}:${String(p.startTime % 60).padStart(2, "0")}`,
+            endHour : `${Math.floor(p.endTime / 60)}:${String(p.endTime % 60).padStart(2, "0")}`,
+        }))
         return {
-            periods
+            formattedPeriods
         }
     }
 }

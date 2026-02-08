@@ -48,7 +48,7 @@ export const periodController = {
     },
     getAllPeriodsSimple: async (req, res, next) => {
         try {
-            const data = await periodService.getAllPeriods(period, page)
+            const data = await periodService.getAllPeriodsSimple()
             const response = responseSuccess(data, "Lấy danh sách tiết học thành công")
             res.status(response.status).json(response)
         } catch (err) {
