@@ -317,13 +317,14 @@ model Program {
 }
 
 model ProgramSubject {
-  id        Int         @id @default(autoincrement())
-  programId Int
-  subjectId Int
-  type      SubjectType @default(MANDATORY)
-  isActive  Boolean     @default(true)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           Int         @id @default(autoincrement())
+  programId    Int
+  subjectId    Int
+  type         SubjectType @default(MANDATORY)
+  feePerCredit Int?
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   semesterOrder Int?
 
@@ -332,16 +333,16 @@ model ProgramSubject {
 }
 
 model Subject {
-  id              Int    @id @default(autoincrement())
-  code            String @unique
+  id              Int      @id @default(autoincrement())
+  code            String   @unique
   name            String
   credits         Int
   theoryMinutes   Int
-  practiceMinutes Int    @default(0)
-
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  practiceMinutes Int      @default(0)
+  countToGpa      Boolean  @default(true)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   courseSections  CourseSection[]
   programSubjects ProgramSubject[]

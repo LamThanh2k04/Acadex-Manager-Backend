@@ -6,8 +6,8 @@ import validateMissingFields from "../../utils/validateFields.js"
 
 export const subjectService = {
     createSubject: async (data) => {
-        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods'])
-        const { name, credits, theoryPeriods, practicePeriods } = data
+        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods', 'countToGpa'])
+        const { name, credits, theoryPeriods, practicePeriods, countToGpa } = data
 
         if (typeof name !== 'string' || name.trim() === "") {
             throw new BadrequestException("Tên môn không hợp lệ")
@@ -20,6 +20,9 @@ export const subjectService = {
         }
         if (!Number.isInteger(Number(practicePeriods)) || Number(practicePeriods) < 0) {
             throw new BadrequestException("Số tiết thực hành không hợp lệ")
+        }
+        if (typeof countToGpa !== 'boolean') {
+            throw new BadrequestException("Trạng thái có tính điểm GPA không hợp lệ")
         }
         const periodTime = await prisma.periodSetting.findFirst()
         if (!periodTime) {
@@ -45,7 +48,8 @@ export const subjectService = {
                 name: name.trim(),
                 credits: credits,
                 theoryMinutes: theoryMinutes,
-                practiceMinutes: practiceMinutes
+                practiceMinutes: practiceMinutes,
+                countToGpa: countToGpa
             }
         })
         return {
@@ -53,8 +57,8 @@ export const subjectService = {
         }
     },
     updateSubjectInfo: async (subjectId, data) => {
-        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods'])
-        const { name, credits, theoryPeriods, practicePeriods } = data
+        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods', 'countToGpa'])
+        const { name, credits, theoryPeriods, practicePeriods, countToGpa } = data
 
         if (typeof name !== 'string' || name.trim() === "") {
             throw new BadrequestException("Tên môn không hợp lệ")
@@ -68,7 +72,9 @@ export const subjectService = {
         if (!Number.isInteger(Number(practicePeriods)) || Number(practicePeriods) < 0) {
             throw new BadrequestException("Số tiết thực hành không hợp lệ")
         }
-
+        if (typeof countToGpa !== 'boolean') {
+            throw new BadrequestException("Trạng thái có tính điểm GPA không hợp lệ")
+        }
         const [subject, existingSubject, periodTime] = await Promise.all([
             prisma.subject.findUnique({ where: { id: Number(subjectId) } }),
             prisma.subject.findFirst({ where: { name: name.trim(), NOT: { id: Number(subjectId) } } }),
@@ -97,7 +103,8 @@ export const subjectService = {
                 name: name.trim(),
                 credits: credits,
                 theoryMinutes: theoryMinutes,
-                practiceMinutes: practiceMinutes
+                practiceMinutes: practiceMinutes,
+                countToGpa : countToGpa
             }
         })
         return {
@@ -150,8 +157,8 @@ export const subjectService = {
             ...s,
             theoryPeriods: s.theoryMinutes / minutesPerPeriod,
             practicePeriods: s.practiceMinutes / minutesPerPeriod,
-            theoryHours : s.theoryMinutes / 60,
-            practiceHours : s.practiceMinutes / 60
+            theoryHours: s.theoryMinutes / 60,
+            practiceHours: s.practiceMinutes / 60
         }))
         return {
             subjects: formattedSubjects,
