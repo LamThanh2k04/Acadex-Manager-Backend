@@ -1,6 +1,6 @@
 import slugify from "slugify";
 
-const generateCodeProgram = (name) => {
+const generateProgramCode = (name) => {
     const programCode = slugify(name, {
         replacement: ' ',
         lower: false,
@@ -11,4 +11,4 @@ const generateCodeProgram = (name) => {
     const shortProgramCode = programCode.split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase();
     return `CT-${shortProgramCode}`;
 }
-export default generateCodeProgram
+export default generateProgramCode

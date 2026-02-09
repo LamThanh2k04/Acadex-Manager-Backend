@@ -297,6 +297,7 @@ model Class {
 model Program {
   id                   Int            @id @default(autoincrement())
   code                 String         @unique
+  name                 String
   trainingLevel        TrainingLevel? @default(BACHELOR)
   educationType        EducationType? @default(FULL_TIME)
   plannedEducationYear Float?
@@ -331,12 +332,12 @@ model ProgramSubject {
 }
 
 model Subject {
-  id            Int    @id @default(autoincrement())
-  code          String @unique
-  name          String
-  credits       Int
-  theoryHours   Int
-  practiceHours Int    @default(0)
+  id              Int    @id @default(autoincrement())
+  code            String @unique
+  name            String
+  credits         Int
+  theoryMinutes   Int
+  practiceMinutes Int    @default(0)
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

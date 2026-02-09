@@ -6,8 +6,8 @@ import validateMissingFields from "../../utils/validateFields.js"
 
 export const subjectService = {
     createSubject: async (data) => {
-        validateMissingFields(data, ['name', 'credits', 'theoryHours', 'practiceHours'])
-        const { name, credits, theoryHours, practiceHours } = data
+        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods'])
+        const { name, credits, theoryPeriods, practicePeriods } = data
 
         if (typeof name !== 'string' || name.trim() === "") {
             throw new BadrequestException("Tên môn không hợp lệ")
@@ -15,13 +15,22 @@ export const subjectService = {
         if (!Number.isInteger(Number(credits))) {
             throw new BadrequestException("Số tín chỉ không hợp lệ")
         }
-        if (!Number.isInteger(Number(theoryHours))) {
-            throw new BadrequestException("Số giờ lý thuyết không hợp lệ")
+        if (!Number.isInteger(Number(theoryPeriods)) || Number(theoryPeriods) < 0) {
+            throw new BadrequestException("Số tiết lý thuyết không hợp lệ")
         }
-        if (!Number.isInteger(Number(practiceHours))) {
-            throw new BadrequestException("Số giờ thực hành không hợp lệ")
+        if (!Number.isInteger(Number(practicePeriods)) || Number(practicePeriods) < 0) {
+            throw new BadrequestException("Số tiết thực hành không hợp lệ")
         }
-
+        const periodTime = await prisma.periodSetting.findFirst()
+        if (!periodTime) {
+            throw new BadrequestException("Chưa cấu hình thời gian tiết")
+        }
+        const minutesPerPeriod = periodTime.endTime - periodTime.startTime
+        if (minutesPerPeriod <= 0) {
+            throw new BadrequestException("Cấu hình thời gian tiết không hợp lệ")
+        }
+        const theoryMinutes = Number(theoryPeriods) * minutesPerPeriod
+        const practiceMinutes = Number(practicePeriods) * minutesPerPeriod
         const existingName = await prisma.subject.findFirst({
             where: { name: name.trim() }
         })
@@ -35,8 +44,8 @@ export const subjectService = {
                 code: code,
                 name: name.trim(),
                 credits: credits,
-                theoryHours: Number(theoryHours),
-                practiceHours: Number(practiceHours)
+                theoryMinutes: theoryMinutes,
+                practiceMinutes: practiceMinutes
             }
         })
         return {
@@ -44,8 +53,8 @@ export const subjectService = {
         }
     },
     updateSubjectInfo: async (subjectId, data) => {
-        validateMissingFields(data, ['name', 'credits', 'theoryHours', 'practiceHours'])
-        const { name, credits, theoryHours, practiceHours } = data
+        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods'])
+        const { name, credits, theoryPeriods, practicePeriods } = data
 
         if (typeof name !== 'string' || name.trim() === "") {
             throw new BadrequestException("Tên môn không hợp lệ")
@@ -53,16 +62,17 @@ export const subjectService = {
         if (!Number.isInteger(Number(credits))) {
             throw new BadrequestException("Số tín chỉ không hợp lệ")
         }
-        if (!Number.isInteger(Number(theoryHours))) {
-            throw new BadrequestException("Số giờ lý thuyết không hợp lệ")
+        if (!Number.isInteger(Number(theoryPeriods)) || Number(theoryPeriods) < 0) {
+            throw new BadrequestException("Số tiết lý thuyết không hợp lệ")
         }
-        if (!Number.isInteger(Number(practiceHours))) {
-            throw new BadrequestException("Số giờ thực hành không hợp lệ")
+        if (!Number.isInteger(Number(practicePeriods)) || Number(practicePeriods) < 0) {
+            throw new BadrequestException("Số tiết thực hành không hợp lệ")
         }
 
-        const [subject, existingSubject] = await Promise.all([
+        const [subject, existingSubject, periodTime] = await Promise.all([
             prisma.subject.findUnique({ where: { id: Number(subjectId) } }),
             prisma.subject.findFirst({ where: { name: name.trim(), NOT: { id: Number(subjectId) } } }),
+            prisma.periodSetting.findFirst()
         ])
         if (!subject) {
             throw new NotFoundException("Không tìm thấy môn học này")
@@ -71,13 +81,23 @@ export const subjectService = {
         if (existingSubject) {
             throw new ConflictException("Đã tồn tại tên môn học này")
         }
+        if (!periodTime) {
+            throw new BadrequestException("Chưa cấu hình thời gian tiết")
+        }
+        const minutesPerPeriod = periodTime.endTime - periodTime.startTime
+        if (minutesPerPeriod <= 0) {
+            throw new BadrequestException("Cấu hình thời gian tiết không hợp lệ")
+        }
+        const theoryMinutes = Number(theoryPeriods) * minutesPerPeriod
+        const practiceMinutes = Number(practicePeriods) * minutesPerPeriod
+
         const updateSubjectInfo = await prisma.subject.update({
             where: { id: Number(subjectId) },
             data: {
                 name: name.trim(),
                 credits: credits,
-                theoryHours: Number(theoryHours),
-                practiceHours: Number(practiceHours)
+                theoryMinutes: theoryMinutes,
+                practiceMinutes: practiceMinutes
             }
         })
         return {
@@ -88,7 +108,7 @@ export const subjectService = {
         const subject = await prisma.subject.findUnique({
             where: { id: Number(subjectId) }
         })
-        if(!subject) {
+        if (!subject) {
             throw new NotFoundException("Không tìm thấy môn học này")
         }
         const updateSubjectStatus = await prisma.subject.update({
@@ -107,7 +127,7 @@ export const subjectService = {
         const whereCondition = {
             ...(subjectName ? { name: { contains: subjectName.toLowerCase() } } : {})
         }
-        const [subjects, totalSubjects] = await Promise.all([
+        const [subjects, totalSubjects, periodTime] = await Promise.all([
             prisma.subject.findMany({
                 where: whereCondition,
                 take: limit,
@@ -116,15 +136,25 @@ export const subjectService = {
             }),
             prisma.subject.count({
                 where: whereCondition
-            })
+            }),
+            prisma.periodSetting.findFirst()
         ])
+        if (!periodTime) {
+            throw new BadrequestException("Chưa cấu hình thời gian tiết")
+        }
+        const minutesPerPeriod = periodTime.endTime - periodTime.startTime
+        if (minutesPerPeriod <= 0) {
+            throw new BadrequestException("Cấu hình thời gian tiết không hợp lệ")
+        }
         const formattedSubjects = subjects.map(s => ({
-        ...s,
-        theoryPeriods : Math.round((s.theoryHours * 60) / 50),
-        practicePeriods: Math.round((s.practiceHours * 60) / 50)
-    }))
+            ...s,
+            theoryPeriods: s.theoryMinutes / minutesPerPeriod,
+            practicePeriods: s.practiceMinutes / minutesPerPeriod,
+            theoryHours : s.theoryMinutes / 60,
+            practiceHours : s.practiceMinutes / 60
+        }))
         return {
-            subjects : formattedSubjects,
+            subjects: formattedSubjects,
             pagination: {
                 page: Number(page),
                 limit: limit,
