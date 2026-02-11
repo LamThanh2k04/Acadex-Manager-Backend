@@ -56,8 +56,8 @@ export const programService = {
                 educationType: educationType,
                 plannedEducationYear: Number(plannedEducationYear),
                 feePerCredit: Number(feePerCredit),
-                version : Number(version),
-                majorId : Number(majorId),
+                version: Number(version),
+                majorId: Number(majorId),
             }
         })
         return {
@@ -140,50 +140,50 @@ export const programService = {
             updateProgramStatus
         }
     },
-    getAllPrograms: async (programName,page) => {
+    getAllPrograms: async (programName, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            ...(programName ? {name : {contains : programName.toLowerCase()}} : {})
+            ...(programName ? { name: { contains: programName.toLowerCase() } } : {})
         }
         const [programs, totalPrograms] = await Promise.all([
             prisma.program.findMany({
-                where : whereCondition,
-                take : limit,
-                skip : skip,
-                orderBy : {createdAt : 'desc'},
-                include : {
-                    major : {
-                        select : {
-                            name : true
+                where: whereCondition,
+                take: limit,
+                skip: skip,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    major: {
+                        select: {
+                            name: true
                         }
                     }
                 }
             }),
             prisma.program.count({
-                where : whereCondition
+                where: whereCondition
             })
         ])
         return {
             programs,
-            pagination : {
-                page : Number(page),
-                limit : limit,
-                total : totalPrograms,
-                totalPages : Math.ceil(totalPrograms/limit)
+            pagination: {
+                page: Number(page),
+                limit: limit,
+                total: totalPrograms,
+                totalPages: Math.ceil(totalPrograms / limit)
             }
         }
     },
     getAllProgramsSimple: async () => {
         const programs = await prisma.program.findMany({
-            where : {isActive : true},
-            select : {
-                id : true,
-                name : true,
-                version : true,
-                major : {
-                    select : {
-                        name : true
+            where: { isActive: true },
+            select: {
+                id: true,
+                name: true,
+                version: true,
+                major: {
+                    select: {
+                        name: true
                     }
                 }
             }
@@ -191,5 +191,183 @@ export const programService = {
         return {
             programs
         }
+    },
+    getProgramInfo: async (programId) => {
+        const program = await prisma.program.findUnique({
+            where: { id: Number(programId) },
+            include: {
+                programSubjects: {
+                    select: {
+                        semesterOrder: true,
+                        subject: true
+                    }
+                },
+                programCertificates: {
+                    select: {
+                        template: true
+                    }
+                }
+            }
+        })
+        if (!program) {
+            throw new NotFoundException("Không tìm thấy thông tin chương trình")
+        }
+        return {
+            program
+        }
+    },
+    addSubjectToProgram: async (programId, data) => {
+        validateMissingFields(data, ['subjectIds', 'type'])
+        const { semesterOrder, type, feePerCredit, subjectIds } = data
+
+        if (!Number.isInteger(Number(programId))) {
+            throw new BadrequestException("Chương trình không hợp lệ")
+        }
+        if (!Number.isInteger(Number(semesterOrder))) {
+            throw new BadrequestException("Học kì không hợp lệ")
+        }
+        if (typeof type !== 'string' || type.trim() === '') {
+            throw new BadrequestException("Loại môn không hợp lệ")
+        }
+        if (
+            feePerCredit !== null &&
+            feePerCredit !== undefined &&
+            !Number.isInteger(Number(feePerCredit))
+        ) {
+            throw new BadrequestException("Tiền cho 1 tín chỉ không hợp lệ");
+        }
+        if (!Array.isArray(subjectIds) || subjectIds.length === 0) {
+            throw new BadrequestException("Subjects phải là mảng và không được rỗng")
+        }
+        return await prisma.$transaction(async (tx) => {
+            const existingSubjects = await tx.programSubject.findMany({
+                where: {
+                    programId: Number(programId),
+                    subjectId: { in: subjectIds.map(Number) }
+                },
+                select: {
+                    subject: { select: { name: true } }
+                }
+            })
+
+            if (existingSubjects.length > 0) {
+                const names = existingSubjects.map(e => e.subject.name)
+                throw new BadrequestException(
+                    `Các môn đã tồn tại trong chương trình: ${names.join(", ")}`
+                )
+            }
+            const insertData = subjectIds.map(subjectId => ({
+                programId: Number(programId),
+                subjectId: Number(subjectId),
+                semesterOrder: Number(semesterOrder),
+                type: type,
+                feePerCredit: feePerCredit ?? null
+            }))
+            await tx.programSubject.createMany({
+                data: insertData
+            })
+            const subjects = await tx.programSubject.findMany({
+                where: {
+                    programId: Number(programId),
+                    isActive: true
+                },
+                select: {
+                    subject: {
+                        select: { credits: true }
+                    }
+                }
+            })
+
+            const totalCredits = subjects.reduce(
+                (sum, s) => sum + (s.subject?.credits || 0),
+                0
+            )
+            await tx.program.update({
+                where: { id: Number(programId) },
+                data: {
+                    totalCredits: totalCredits
+                }
+            })
+        })
+    },
+    updateSubjectToProgram: async (programSubjectId, data) => {
+
+        validateMissingFields(data, ['type', 'isActive', 'semesterOrder'])
+
+        if (!Number.isInteger(Number(programSubjectId))) {
+            throw new BadrequestException("ProgramSubject không hợp lệ")
+        }
+
+        const { type, isActive, semesterOrder, feePerCredit } = data
+
+        if (typeof isActive !== 'boolean') {
+            throw new BadrequestException("Trạng thái isActive không hợp lệ")
+        }
+
+        if (!Number.isInteger(Number(semesterOrder))) {
+            throw new BadrequestException("Học kỳ không hợp lệ")
+        }
+
+        if (
+            feePerCredit !== null &&
+            feePerCredit !== undefined &&
+            !Number.isInteger(Number(feePerCredit))
+        ) {
+            throw new BadrequestException("FeePerCredit không hợp lệ")
+        }
+
+        return await prisma.$transaction(async (tx) => {
+
+            const ps = await tx.programSubject.findUnique({
+                where: { id: Number(programSubjectId) },
+                include: { program: true }
+            })
+
+            if (!ps) {
+                throw new NotFoundException("Không tìm thấy môn trong chương trình")
+            }
+
+            const oldIsActive = ps.isActive
+
+            const updateSubjectToProgram = await tx.programSubject.update({
+                where: { id: ps.id },
+                data: {
+                    type,
+                    isActive,
+                    semesterOrder: Number(semesterOrder),
+                    feePerCredit: feePerCredit ?? null
+                }
+            })
+
+            if (oldIsActive !== isActive) {
+
+                const subjects = await tx.programSubject.findMany({
+                    where: {
+                        programId: ps.programId,
+                        isActive: true
+                    },
+                    select: {
+                        subject: {
+                            select: { credits: true }
+                        }
+                    }
+                })
+
+                const totalCredits = subjects.reduce(
+                    (sum, s) => sum + (s.subject?.credits || 0),
+                    0
+                )
+
+                await tx.program.update({
+                    where: { id: ps.programId },
+                    data: {
+                        totalCredits: totalCredits
+                    }
+                })
+            }
+
+            return updateSubjectToProgram
+        })
     }
+
 }

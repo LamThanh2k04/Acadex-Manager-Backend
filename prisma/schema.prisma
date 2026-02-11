@@ -330,6 +330,8 @@ model ProgramSubject {
 
   program Program @relation(fields: [programId], references: [id])
   subject Subject @relation(fields: [subjectId], references: [id])
+
+  @@unique([programId, subjectId])
 }
 
 model Subject {
