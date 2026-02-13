@@ -195,9 +195,11 @@ export const programService = {
     getProgramInfo: async (programId) => {
         const program = await prisma.program.findUnique({
             where: { id: Number(programId) },
-            include: {
+            include: { 
                 programSubjects: {
                     select: {
+                        id : true,
+                        feePerCredit : true,
                         semesterOrder: true,
                         subject: true
                     }
@@ -221,7 +223,7 @@ export const programService = {
         const { semesterOrder, type, feePerCredit, subjectIds } = data
 
         if (!Number.isInteger(Number(programId))) {
-            throw new BadrequestException("Chương trình không hợp lệ")
+            throw new BadrequestException("programId không hợp lệ")
         }
         if (!Number.isInteger(Number(semesterOrder))) {
             throw new BadrequestException("Học kì không hợp lệ")
@@ -240,6 +242,19 @@ export const programService = {
             throw new BadrequestException("Subjects phải là mảng và không được rỗng")
         }
         return await prisma.$transaction(async (tx) => {
+            const program = await tx.program.findUnique({
+                where: { id: Number(programId) }
+            })
+
+            if (!program) {
+                throw new NotFoundException("Không tìm thấy chương trình")
+            }
+            const sb = await tx.subject.findMany({
+                where: { id: { in: subjectIds.map(Number) } }
+            })
+            if (sb.length !== subjectIds.length) {
+                throw new BadrequestException("Có môn không tồn tại")
+            }
             const existingSubjects = await tx.programSubject.findMany({
                 where: {
                     programId: Number(programId),
@@ -368,6 +383,81 @@ export const programService = {
 
             return updateSubjectToProgram
         })
-    }
+    },
+    addCertificateToProgram: async (programId, data) => {
+        validateMissingFields(data, ['certificateIds'])
+        const { certificateIds } = data
 
+        if (!Number.isInteger(Number(programId))) {
+            throw new BadrequestException("Chương trình không hợp lệ")
+        }
+        if (!Array.isArray(certificateIds) || certificateIds.length === 0) {
+            throw new BadrequestException("Danh sách chứng chỉ không hợp lệ")
+        }
+        return await prisma.$transaction(async (tx) => {
+            const program = await tx.program.findUnique({
+                where: { id: Number(programId) }
+            })
+
+            if (!program) {
+                throw new NotFoundException("Không tìm thấy chương trình")
+            }
+
+            const certs = await tx.certificateTemplate.findMany({
+                where: { id: { in: certificateIds.map(Number) } }
+            })
+
+            if (certs.length !== certificateIds.length) {
+                throw new NotFoundException("Có chứng chỉ không tồn tại")
+            }
+            const existingCertificate = await tx.programCertificate.findMany({
+                where: {
+                    programId: Number(programId),
+                    templateId: { in: certificateIds.map(Number) }
+                },
+                include: {
+                    template: {
+                        select: {
+                            name: true
+                        }
+                    }
+                }
+            })
+            if (existingCertificate.length > 0) {
+                const names = existingCertificate.map(e => e.certificate.name)
+                throw new BadrequestException(
+                    `Chứng chỉ đã tồn tại: ${names.join(", ")}`
+                )
+            }
+            const insertData = certificateIds.map(certificateId => ({
+                programId: Number(programId),
+                templateId: Number(certificateId)
+            }))
+            await tx.programCertificate.createMany({
+                data: insertData
+            })
+        })
+    },
+    updateCertificateToProgram: async (programCertificateId) => {
+
+        if (!Number.isInteger(Number(programCertificateId))) {
+            throw new BadrequestException("ProgramCertificate không hợp lệ")
+        }
+        const programCertificate = await prisma.programCertificate.findUnique({
+            where: { id: Number(programCertificateId) }
+        })
+        if (!programCertificate) {
+            throw new NotFoundException("Không tìm thấy chứng chỉ trong chương trình")
+        }
+
+        const updateCertificateToProgram = await prisma.programCertificate.update({
+            where: { id: Number(programCertificateId) },
+            data: {
+                isActive: !programCertificate.isActive
+            }
+        })
+        return {
+            updateCertificateToProgram
+        }
+    }
 }

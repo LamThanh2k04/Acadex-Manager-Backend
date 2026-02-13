@@ -56,9 +56,9 @@ export const programController = {
             next(err)
         }
     },
-      getProgramInfo: async (req, res, next) => {
+    getProgramInfo: async (req, res, next) => {
         try {
-             const programId = req.params.programId
+            const programId = req.params.programId
             const data = await programService.getProgramInfo(programId)
             const response = responseSuccess(data, "Lấy thông tin chương trình thành công")
             res.status(response.status).json(response)
@@ -67,26 +67,49 @@ export const programController = {
             next(err)
         }
     },
-      addSubjectToProgram: async (req, res, next) => {
+    addSubjectToProgram: async (req, res, next) => {
         try {
             const programId = req.params.programId
-            await programService.addSubjectToProgram(programId,req.body)
-            const response = responseSuccess("Gán môn học chương trình thành công")
+            await programService.addSubjectToProgram(programId, req.body)
+            const response = responseSuccess("Gán môn học vào chương trình thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Gán môn học chương trình thất bại", err)
+            console.error("Gán môn học vào chương trình thất bại", err)
             next(err)
         }
     },
-      updateSubjectToProgram: async (req, res, next) => {
+    updateSubjectToProgram: async (req, res, next) => {
         try {
             const programSubjectId = req.params.programSubjectId
-            const data = await programService.updateSubjectToProgram(programSubjectId,req.body)
+            const data = await programService.updateSubjectToProgram(programSubjectId, req.body)
             const response = responseSuccess(data, "Cập nhật môn học chương trình thành công")
             res.status(response.status).json(response)
         } catch (err) {
             console.error("Cập nhật môn học chương trình thất bại", err)
             next(err)
         }
-    }
+    },
+    addCertificateToProgram: async (req, res, next) => {
+        try {
+            const programId = req.params.programId
+            await programService.addCertificateToProgram(programId, req.body)
+            const response = responseSuccess("Gán chứng chỉ vào chương trình thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Gán chứng chỉ vào chương trình thất bại", err)
+            next(err)
+        }
+    },
+    updateCertificateToProgram: async (req, res, next) => {
+        try {
+            const programCertificateId = req.params.programCertificateId
+            const data = await programService.updateCertificateToProgram(programCertificateId, req.body)
+            const response = responseSuccess(data, "Cập nhật chứng chỉ chương trình thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Cập nhật chứng chỉ chương trình thất bại", err)
+            next(err)
+        }
+    },
+
 }

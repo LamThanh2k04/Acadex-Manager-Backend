@@ -11,4 +11,6 @@ router.get('/getAllProgramsSimple',programController.getAllProgramsSimple)
 router.get('/getProgramInfo/:programId',programController.getProgramInfo)
 router.post('/addSubjectToProgram/:programId',programController.addSubjectToProgram)
 router.put('/updateSubjectToProgram/:programSubjectId',programController.updateSubjectToProgram)
+router.post('/addCertificateToProgram/:programId',programController.addCertificateToProgram)
+router.put('/updateCertificateToProgram/:programCertificateId',programController.updateCertificateToProgram)
 export default router

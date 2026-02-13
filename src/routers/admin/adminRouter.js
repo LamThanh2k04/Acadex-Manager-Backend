@@ -8,6 +8,7 @@ import semesterRouter from '../admin/semesterRouter.js'
 import periodRouter from '../admin/periodRouter.js'
 import certificateRouter from '../admin/certificateRouter.js'
 import programRouter from '../admin/programRouter.js'
+import classRouter from '../admin/classRouter.js'
 const router = express.Router();
 
 router.use('/faculty', facultyRouter);
@@ -19,4 +20,5 @@ router.use('/semester', semesterRouter)
 router.use('/period',periodRouter)
 router.use('/certificate',certificateRouter)
 router.use('/program',programRouter)
+router.use('/class',classRouter)
 export default router;
