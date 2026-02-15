@@ -111,5 +111,29 @@ export const programController = {
             next(err)
         }
     },
+    getSemesterOrdersPrgram: async (req, res, next) => {
+        try {
+            const programId = req.params.programId
+            const data = await programService.getSemesterOrdersPrgram(programId)
+            const response = responseSuccess(data, 'Lấy danh sách học kì của chương trình này thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy danh sách học kì của chương trình này thất bại", err)
+            next(err)
+        }
+    },
+    getSubjectsBySemesterOrder: async (req, res, next) => {
+        try {
+            const programId = req.params.programId
+            const semesterOrderId = req.params.semesterOrderId
+            const data = await programService.getSubjectsBySemesterOrder(programId,semesterOrderId)
+            const response = responseSuccess(data, 'Lấy danh sách môn học theo học kì của chương trình này thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy danh sách môn học theo học kì của chương trình này thất bại", err)
+            next(err)
+        }
+    },
+
 
 }

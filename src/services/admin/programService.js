@@ -195,11 +195,11 @@ export const programService = {
     getProgramInfo: async (programId) => {
         const program = await prisma.program.findUnique({
             where: { id: Number(programId) },
-            include: { 
+            include: {
                 programSubjects: {
                     select: {
-                        id : true,
-                        feePerCredit : true,
+                        id: true,
+                        feePerCredit: true,
                         semesterOrder: true,
                         subject: true
                     }
@@ -261,6 +261,7 @@ export const programService = {
                     subjectId: { in: subjectIds.map(Number) }
                 },
                 select: {
+                    semesterOrder : true,
                     subject: { select: { name: true } }
                 }
             })
@@ -268,7 +269,7 @@ export const programService = {
             if (existingSubjects.length > 0) {
                 const names = existingSubjects.map(e => e.subject.name)
                 throw new BadrequestException(
-                    `Các môn đã tồn tại trong chương trình: ${names.join(", ")}`
+                    `Các môn đã tồn tại trong chương trình: ${names.join(", ")} ở kì:${existingSubjects[0].semesterOrder}`
                 )
             }
             const insertData = subjectIds.map(subjectId => ({
@@ -459,5 +460,56 @@ export const programService = {
         return {
             updateCertificateToProgram
         }
-    }
+    },
+    getSemesterOrdersPrgram: async (programId) => {
+
+        const [program, semesterOrder] = await Promise.all([
+            prisma.program.findUnique({
+                where: { id: Number(programId) }
+            }),
+            prisma.programSubject.findMany({
+                where: { programId: Number(programId) },
+                distinct: ['semesterOrder'],
+                select: {
+                    semesterOrder: true
+                },
+                orderBy: { createdAt: 'asc' }
+            })
+        ])
+        if (!program) {
+            throw new NotFoundException("Không tìm thấy chương trình")
+        }
+        return {
+            semesterOrder
+        }
+    },
+    getSubjectsBySemesterOrder: async (programId, semesterOrderId) => {
+        const [program, subjects] = await Promise.all([
+            prisma.program.findUnique({
+                where: { id: Number(programId) }
+            }),
+            prisma.programSubject.findMany({
+                where: { programId: Number(programId), semesterOrder: Number(semesterOrderId) },
+                select: {
+                    semesterOrder : true,
+                    subject: {
+                        select: {
+                            id: true,
+                            code : true,
+                            name: true,
+                            credits : true
+                        }
+                    }
+                },
+                orderBy: { id: 'asc' }
+            })
+        ])
+        if (!program) {
+            throw new NotFoundException("Không tìm thấy chương trình")
+        }
+        return {
+            subjects
+        }
+    },
+
 }

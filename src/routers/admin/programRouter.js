@@ -13,4 +13,6 @@ router.post('/addSubjectToProgram/:programId',programController.addSubjectToProg
 router.put('/updateSubjectToProgram/:programSubjectId',programController.updateSubjectToProgram)
 router.post('/addCertificateToProgram/:programId',programController.addCertificateToProgram)
 router.put('/updateCertificateToProgram/:programCertificateId',programController.updateCertificateToProgram)
+router.get('/getSemesterOrdersPrgram/:programId',programController.getSemesterOrdersPrgram)
+router.get('/getSubjectsBySemesterOrder/:programId/semesterOrder/:semesterOrderId',programController.getSubjectsBySemesterOrder)
 export default router
