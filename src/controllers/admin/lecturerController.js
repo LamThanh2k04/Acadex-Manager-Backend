@@ -25,10 +25,10 @@ export const lecturerController = {
             next(err)
         }
     },
-    updateLecturerStatus: async (req, res, next) => {
+    updateLecturerStatusActive: async (req, res, next) => {
         try {
             const lecturerId = req.params.lecturerId
-            const data = await lecturerService.updateLecturerStatus(lecturerId)
+            const data = await lecturerService.updateLecturerStatusActive(lecturerId)
             const response = responseSuccess(data, 'Cập nhật trạng thái giảng viên thành công')
             res.status(response.status).json(response)
         } catch (err) {
@@ -55,6 +55,28 @@ export const lecturerController = {
             res.status(response.status).json(response)
         } catch (err) {
             console.error('Lấy danh sách giảng viên thất bại', err)
+            next(err)
+        }
+    },
+    resetPasswordLecturer: async (req, res, next) => {
+        try {
+            const lecturerId = req.params.lecturerId
+            const data = await lecturerService.resetPasswordLecturer(lecturerId, req.body)
+            const response = responseSuccess(data, 'Đặt lại mật khẩu giảng viên thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Đặt lại mật khẩu giảng viên thất bại', err)
+            next(err)
+        }
+    },
+    getlecturersByMajor: async (req, res, next) => {
+        try {
+            const majorId = req.params.majorId
+            const data = await lecturerService.getlecturersByMajor(majorId)
+            const response = responseSuccess(data, 'Lấy danh sách giảng viên theo ngành thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy danh sách giảng viên theo ngành thất bại', err)
             next(err)
         }
     },

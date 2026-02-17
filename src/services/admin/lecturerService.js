@@ -6,7 +6,7 @@ import validatePassword from "../../utils/validatePassword.js"
 import bcrypt from 'bcrypt'
 export const lecturerService = {
     createLecturer: async (data, avatarPath) => {
-        validateMissingFields(data, ['fullName', 'email', 'password', 'lecturerCode', 'majorId','gender'])
+        validateMissingFields(data, ['fullName', 'email', 'password', 'lecturerCode', 'majorId', 'gender'])
         const { fullName, email, password, lecturerCode, majorId, gender } = data
         if (typeof fullName !== 'string' || fullName.trim() === '') {
             throw new BadrequestException("Tên không hợp lệ")
@@ -80,8 +80,11 @@ export const lecturerService = {
         }
     },
     updateLecturerInfo: async (lecturerId, data, avatarPath) => {
-        const { fullName, email, lecturerCode, majorId, gender, degree, position, citizenId, personalEmail, placeOfBirth, ethnicity, address, dateOfBirth, phoneNumber } = data
-        const parsedDateOfBirth = new Date(dateOfBirth)
+        const { fullName, email, lecturerCode, majorId, gender, degree, position, citizenId, personalEmail, placeOfBirth, ethnicity, address, dateOfBirth, phoneNumber, status } = data
+        const parsedDateOfBirth = dateOfBirth
+            ? new Date(dateOfBirth)
+            : null;
+
         if (typeof fullName !== 'string' || fullName.trim() === '') {
             throw new BadrequestException("Tên không hợp lệ")
         }
@@ -106,13 +109,13 @@ export const lecturerService = {
         if (!lecturer) {
             throw new NotFoundException("Không tìm thấy giảng viên")
         }
-        const exstingEmail = await prisma.user.findUnique({
+        const exstingEmail = await prisma.user.findFirst({
             where: { email: email.trim(), NOT: { id: lecturer.user.id } }
         })
         if (exstingEmail) {
             throw new ConflictException("Đã tồn tại email giảng viên")
         }
-        const existingLecturerCode = await prisma.lecturer.findUnique({
+        const existingLecturerCode = await prisma.lecturer.findFirst({
             where: { lecturerCode: lecturerCode.trim(), NOT: { id: Number(lecturerId) } }
         })
         if (existingLecturerCode) {
@@ -131,7 +134,7 @@ export const lecturerService = {
                 email: email.trim(),
                 gender: gender,
                 avatar: avatarPath ? avatarPath : null,
-                dateOfBirth: dateOfBirth ? parsedDateOfBirth : null,
+                dateOfBirth: parsedDateOfBirth,
                 phoneNumber: phoneNumber ? phoneNumber.trim() : null,
                 address: address ? address.trim() : null,
                 lecturer: {
@@ -144,20 +147,24 @@ export const lecturerService = {
                         citizenId: citizenId ? citizenId.trim() : null,
                         placeOfBirth: placeOfBirth ? placeOfBirth.trim() : null,
                         personalEmail: personalEmail ? personalEmail.trim() : null,
-                        ethnicity: ethnicity ? ethnicity.trim() : null
+                        ethnicity: ethnicity ? ethnicity.trim() : null,
+                        status: status
                     }
                 }
+            },
+            include: {
+                lecturer: true
             }
         })
         return {
             updateLecturer
         }
     },
-    updateLecturerStatus: async (lecturerId) => {
+    updateLecturerStatusActive: async (lecturerId) => {
         const lecturer = await prisma.lecturer.findUnique({
             where: { id: Number(lecturerId) },
-            include : {
-                user : true
+            include: {
+                user: true
             }
         })
         if (!lecturer) {
@@ -206,44 +213,95 @@ export const lecturerService = {
             } : {}),
         }
         const [lecturers, totalLecturers] = await prisma.$transaction([
-             prisma.user.findMany({
-                where : whereCondition,
-                take : limit,
-                skip : skip,
-                orderBy : {createdAt : 'desc'},
-                include : {
-                    lecturer : true
+            prisma.user.findMany({
+                where: whereCondition,
+                take: limit,
+                skip: skip,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    lecturer: true
                 }
             }),
-             prisma.user.count({
-                where : whereCondition
+            prisma.user.count({
+                where: whereCondition
             })
         ])
         return {
             lecturers,
-            pagination : {
-                page : Number(page),
-                limit : limit,
-                total : totalLecturers,
-                totalPages : Math.ceil(totalLecturers/limit)
+            pagination: {
+                page: Number(page),
+                limit: limit,
+                total: totalLecturers,
+                totalPages: Math.ceil(totalLecturers / limit)
             }
         }
     },
-    getAllLecturersSimple : async () => {
+    getAllLecturersSimple: async () => {
         const lecturers = await prisma.user.findMany({
-            where : {role : 'LECTURER',isActive: true},
+            where: { role: 'LECTURER', isActive: true },
             select: {
-                fullName : true,
-                lecturer : {
-                    select : {
-                        id : true,
-                        lecturerCode : true,
-                        major : {
-                            select : {
-                                id : true,
-                                name : true
+                fullName: true,
+                lecturer: {
+                    select: {
+                        id: true,
+                        lecturerCode: true,
+                        major: {
+                            select: {
+                                id: true,
+                                name: true
                             }
                         }
+                    }
+                }
+            }
+        })
+        return {
+            lecturers
+        }
+    },
+    resetPasswordLecturer: async (lecturerId, data) => {
+        validateMissingFields(data, ['newPassword'])
+
+        const { newPassword } = data
+        if (typeof newPassword !== 'string' || newPassword.trim() === '') {
+            throw new BadrequestException("Mật khẩu không hợp lệ")
+        }
+        validatePassword(newPassword)
+
+        const lecturer = await prisma.lecturer.findUnique({
+            where: { id: Number(lecturerId) },
+            include: {
+                user: true
+            }
+        })
+        if (!lecturer) {
+            throw new NotFoundException("Không tìm thấy giảng viên")
+        }
+        const hashpasword = await bcrypt.hash(newPassword, 10)
+        const resetPasswordLecturer = await prisma.user.update({
+            where: { id: lecturer.user.id },
+            data: {
+                password: hashpasword
+            }
+        })
+        return {
+            resetPasswordLecturer
+        }
+    },
+    getlecturersByMajor: async (majorId) => {
+        const lecturers = await prisma.lecturer.findMany({
+            where: {
+                majorId: Number(majorId),
+                status: 'WORKING',
+                user: {
+                    isActive: true
+                }
+            },
+            select: {
+                id: true,
+                user: {
+                    select: {
+                        fullName: true
                     }
                 }
             }
