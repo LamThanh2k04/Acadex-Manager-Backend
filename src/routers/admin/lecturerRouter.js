@@ -9,5 +9,5 @@ router.put('/updateLecturerStatusActive/:lecturerId', lecturerController.updateL
 router.get('/getAllLecturers', lecturerController.getAllLecturers)
 router.get('/getAllLecturersSimple', lecturerController.getAllLecturersSimple)
 router.put('/resetPasswordLecturer/:lecturerId', lecturerController.resetPasswordLecturer)
-router.get('/getlecturersByMajor/:majorId', lecturerController.getlecturersByMajor)
+router.get('/getlecturersByFaculty/:facultyId', lecturerController.getlecturersByFaculty)
 export default router

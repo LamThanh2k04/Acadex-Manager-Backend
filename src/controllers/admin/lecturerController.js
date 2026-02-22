@@ -69,14 +69,14 @@ export const lecturerController = {
             next(err)
         }
     },
-    getlecturersByMajor: async (req, res, next) => {
+    getlecturersByFaculty: async (req, res, next) => {
         try {
-            const majorId = req.params.majorId
-            const data = await lecturerService.getlecturersByMajor(majorId)
-            const response = responseSuccess(data, 'Lấy danh sách giảng viên theo ngành thành công')
+            const facultyId = req.params.facultyId
+            const data = await lecturerService.getlecturersByFaculty(facultyId)
+            const response = responseSuccess(data, 'Lấy danh sách giảng viên theo khoa thành công')
             res.status(response.status).json(response)
         } catch (err) {
-            console.error('Lấy danh sách giảng viên theo ngành thất bại', err)
+            console.error('Lấy danh sách giảng viên theo khoa thất bại', err)
             next(err)
         }
     },

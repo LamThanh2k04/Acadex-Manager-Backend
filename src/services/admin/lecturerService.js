@@ -288,10 +288,10 @@ export const lecturerService = {
             resetPasswordLecturer
         }
     },
-    getlecturersByMajor: async (majorId) => {
+    getlecturersByFaculty: async (facultyId) => {
         const lecturers = await prisma.lecturer.findMany({
             where: {
-                majorId: Number(majorId),
+                facultyId: Number(facultyId),
                 status: 'WORKING',
                 user: {
                     isActive: true

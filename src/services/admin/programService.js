@@ -196,6 +196,18 @@ export const programService = {
         const program = await prisma.program.findUnique({
             where: { id: Number(programId) },
             include: {
+                major : {
+                    select : {
+                        id : true,
+                        name : true,
+                        faculty : {
+                           select : {
+                             id : true,
+                            name : true
+                           }
+                        }
+                    }
+                },
                 programSubjects: {
                     select: {
                         id: true,

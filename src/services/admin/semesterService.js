@@ -155,6 +155,8 @@ export const semesterService = {
                 id : true,
                 name: true,
                 academicYear : true,
+                startDate : true,
+                endDate : true
             }
         })
         return {

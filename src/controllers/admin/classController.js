@@ -56,4 +56,15 @@ export const classController = {
             next(err)
         }
     },
+    getClassesByFaculty: async (req, res, next) => {
+        try {
+            const facultyId = req.params.facultyId
+            const data = await classService.getClassesByFaculty(facultyId)
+            const response = responseSuccess(data, "Lấy danh sách lớp theo khoa thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy danh sách lớp theo khoa thất bại", err)
+            next(err)
+        }
+    },
 }
