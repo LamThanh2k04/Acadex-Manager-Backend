@@ -38,9 +38,9 @@ export const lecturerController = {
     },
     getAllLecturers: async (req, res, next) => {
         try {
-            const { lecturerCode, lecturerName, majorName } = req.query
+            const { lecturerCode, lecturerName, majorName,facultyName } = req.query
             const page = req.query.page || 1
-            const data = await lecturerService.getAllLecturers(lecturerCode, lecturerName, majorName, page)
+            const data = await lecturerService.getAllLecturers(lecturerCode, lecturerName, majorName,facultyName, page)
             const response = responseSuccess(data, 'Lấy danh sách giảng viên có phân trang thành công')
             res.status(response.status).json(response)
         } catch (err) {

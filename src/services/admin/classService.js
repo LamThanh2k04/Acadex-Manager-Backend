@@ -250,5 +250,23 @@ export const classService = {
         return {
             classes
         }
+    },
+     getClassesByMajor: async (majorId) => {
+        const major = await prisma.major.findUnique({
+            where: { id: Number(majorId) },
+
+        })
+        if (!major) {
+            throw new NotFoundException("Không tìm thấy chuyên ngành")
+        }
+        const classes = await prisma.class.findMany({
+            where: {
+                isActive : true,
+                majorId: Number(majorId)
+            }
+        })
+        return {
+            classes
+        }
     }
 }

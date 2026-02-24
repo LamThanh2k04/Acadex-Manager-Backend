@@ -67,4 +67,15 @@ export const classController = {
             next(err)
         }
     },
+    getClassesByMajor: async (req, res, next) => {
+        try {
+            const majorId = req.params.majorId
+            const data = await classService.getClassesByMajor(majorId)
+            const response = responseSuccess(data, "Lấy danh sách lớp theo ngành thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy danh sách lớp theo ngành thất bại", err)
+            next(err)
+        }
+    },
 }

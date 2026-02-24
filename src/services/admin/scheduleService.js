@@ -21,12 +21,12 @@ export const scheduleService = {
         if (isNaN(parsedEndDate.getTime())) {
             throw new BadrequestException("Thời gian kết thúc không hợp lệ")
         }
-        if (parsedStartDate >= parsedEndDate) {
+        if (parsedStartDate > parsedEndDate) {
             throw new BadrequestException('Ngày kết thúc phải sau ngày bắt đầu')
         }
-        if (type === 'PRACTICE' && !practiceGroup) {
-            throw new BadrequestException("Phải nhập nhóm thực hành")
-        }
+        // if (type === 'PRACTICE' && !practiceGroup) {
+        //     throw new BadrequestException("Phải nhập nhóm thực hành")
+        // }
 
 
         const [courseSection, room] = await Promise.all([
@@ -106,7 +106,7 @@ export const scheduleService = {
             throw new BadrequestException("Ngày không hợp lệ")
         }
 
-        if (newStartDate >= newEndDate) {
+        if (newStartDate > newEndDate) {
             throw new BadrequestException("Ngày kết thúc phải sau ngày bắt đầu")
         }
         if (roomId !== undefined) {
@@ -217,7 +217,7 @@ export const scheduleService = {
         const whereCondition = {
             ...(courseSectionCode ? {
                 courseSection: {
-                    courseSectionCode: { contains: courseSectionCode.toLowerCase() }
+                    sectionCode: { contains: courseSectionCode.toLowerCase() }
                 }
             } : {}),
             ...(semesterId ? {

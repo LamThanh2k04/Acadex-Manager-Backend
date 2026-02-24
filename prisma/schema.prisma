@@ -214,7 +214,6 @@ model Student {
   facultyId              Int?
   major                  Major?                  @relation(fields: [majorId], references: [id])
   majorId                Int?
-  scheduleEnrollments    ScheduleEnrollment[]
   chatbotInteractions    ChatbotInteraction[]
 }
 
@@ -424,22 +423,7 @@ model Schedule {
   admin         User?         @relation(fields: [approvedBy], references: [id])
 
   scheduleChangeRequest ScheduleChangeRequest[]
-  scheduleEnrollments   ScheduleEnrollment[]
   attendanceSessions    AttendanceSession[]
-}
-
-model ScheduleEnrollment {
-  id Int @id @default(autoincrement())
-
-  studentId  Int
-  scheduleId Int
-
-  student  Student  @relation(fields: [studentId], references: [id])
-  schedule Schedule @relation(fields: [scheduleId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@unique([studentId, scheduleId])
 }
 
 model ScheduleChangeRequest {
@@ -477,12 +461,12 @@ model ScheduleChangeRequest {
 }
 
 model Enrollment {
-  id         Int              @id @default(autoincrement())
-  enrolledAt DateTime         @default(now())
-  fee        Int
-  isPaid     Boolean          @default(false)
-  status     EnrollmentStatus @default(REGISTERED)
-
+  id              Int              @id @default(autoincrement())
+  enrolledAt      DateTime         @default(now())
+  fee             Int
+  isPaid          Boolean          @default(false)
+  status          EnrollmentStatus @default(REGISTERED)
+  practiceGroup   Int?
   studentId       Int
   courseSectionId Int
 

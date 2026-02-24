@@ -9,4 +9,5 @@ router.put('/updateClassStatus/:classId', classController.updateClassStatus)
 router.get('/getAllClasses', classController.getAllClasses)
 router.get('/getAllClassesSimple', classController.getAllClassesSimple)
 router.get('/getClassesByFaculty/:facultyId', classController.getClassesByFaculty)
+router.get('/getClassesByMajor/:majorId', classController.getClassesByMajor)
 export default router

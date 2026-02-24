@@ -80,85 +80,134 @@ export const lecturerService = {
         }
     },
     updateLecturerInfo: async (lecturerId, data, avatarPath) => {
-        const { fullName, email, lecturerCode, majorId, gender, degree, position, citizenId, personalEmail, placeOfBirth, ethnicity, address, dateOfBirth, phoneNumber, status } = data
-        const parsedDateOfBirth = dateOfBirth
-            ? new Date(dateOfBirth)
-            : null;
 
-        if (typeof fullName !== 'string' || fullName.trim() === '') {
-            throw new BadrequestException("Tên không hợp lệ")
-        }
-        if (typeof email !== 'string' || email.trim() === '') {
-            throw new BadrequestException("Email không hợp lệ")
-        }
-        if (typeof lecturerCode !== 'string' || lecturerCode.trim() === '') {
-            throw new BadrequestException("Mã giảng viên không hợp lệ")
-        }
-        if (!Number.isInteger(Number(majorId))) {
-            throw new BadrequestException("MajorId không hợp lệ")
-        }
-        if (typeof gender !== 'string' || gender.trim() === '') {
-            throw new BadrequestException("Giới tính không hợp lệ")
-        }
+        const {
+            fullName, email, lecturerCode, majorId, gender,
+            degree, position, citizenId, personalEmail,
+            placeOfBirth, ethnicity, address,
+            dateOfBirth, phoneNumber, status
+        } = data
+
         const lecturer = await prisma.lecturer.findUnique({
             where: { id: Number(lecturerId) },
-            include: {
-                user: true
-            }
+            include: { user: true }
         })
+
         if (!lecturer) {
             throw new NotFoundException("Không tìm thấy giảng viên")
         }
-        const exstingEmail = await prisma.user.findFirst({
-            where: { email: email.trim(), NOT: { id: lecturer.user.id } }
-        })
-        if (exstingEmail) {
-            throw new ConflictException("Đã tồn tại email giảng viên")
+
+        const updateUserData = {}
+        const updateLecturerData = {}
+
+        if (fullName !== undefined) {
+            if (!fullName.trim()) throw new BadrequestException("Tên không hợp lệ")
+            updateUserData.fullName = fullName.trim()
         }
-        const existingLecturerCode = await prisma.lecturer.findFirst({
-            where: { lecturerCode: lecturerCode.trim(), NOT: { id: Number(lecturerId) } }
-        })
-        if (existingLecturerCode) {
-            throw new ConflictException("Đã tồn tại mã giảng viên")
+
+        if (email !== undefined) {
+            const trimmedEmail = email.trim()
+            if (!trimmedEmail) {
+                throw new BadrequestException("Email không được để trống")
+            }
+            validateEmail(email, "LECTURER")
+            const existingEmail = await prisma.user.findFirst({
+                where: {
+                    email: email.trim(),
+                    NOT: { id: lecturer.user.id }
+                }
+            })
+
+            if (existingEmail) {
+                throw new ConflictException("Email đã tồn tại")
+            }
+
+            updateUserData.email = email.trim()
         }
-        const major = await prisma.major.findUnique({
-            where: { id: Number(majorId) }
-        })
-        if (!major) {
-            throw new NotFoundException("Không tìm thấy ngành này")
+
+        if (gender !== undefined) {
+            updateUserData.gender = gender
         }
-        const updateLecturer = await prisma.user.update({
+
+        if (phoneNumber !== undefined) {
+            updateUserData.phoneNumber = phoneNumber?.trim() || null
+        }
+
+        if (address !== undefined) {
+            updateUserData.address = address?.trim() || null
+        }
+
+        if (dateOfBirth !== undefined) {
+            updateUserData.dateOfBirth = dateOfBirth ? new Date(dateOfBirth) : null
+        }
+
+        if (avatarPath) {
+            updateUserData.avatar = avatarPath
+        }
+
+        if (lecturerCode !== undefined) {
+            const existingCode = await prisma.lecturer.findFirst({
+                where: {
+                    lecturerCode: lecturerCode.trim(),
+                    NOT: { id: Number(lecturerId) }
+                }
+            })
+
+            if (existingCode) {
+                throw new ConflictException("Mã giảng viên đã tồn tại")
+            }
+
+            updateLecturerData.lecturerCode = lecturerCode.trim()
+        }
+
+        if (majorId !== undefined) {
+            const major = await prisma.major.findUnique({
+                where: { id: Number(majorId) }
+            })
+
+            if (!major) {
+                throw new NotFoundException("Không tìm thấy ngành")
+            }
+
+            updateLecturerData.majorId = Number(majorId)
+            updateLecturerData.facultyId = major.facultyId
+        }
+
+        if (degree !== undefined) updateLecturerData.degree = degree
+        if (position !== undefined) updateLecturerData.position = position
+        if (status !== undefined) updateLecturerData.status = status
+
+        if (citizenId !== undefined) updateLecturerData.citizenId = citizenId?.trim() || null
+        if (personalEmail !== undefined) {
+            const trimmedEmail = personalEmail?.trim()
+
+            if (!trimmedEmail) {
+                updateLecturerData.personalEmail = null
+            } else {
+                if (!trimmedEmail.endsWith('@gmail.com')) {
+                    throw new BadrequestException("Email cá nhân phải là gmail")
+                }
+
+                updateLecturerData.personalEmail = trimmedEmail
+            }
+        }
+        if (placeOfBirth !== undefined) updateLecturerData.placeOfBirth = placeOfBirth?.trim() || null
+        if (ethnicity !== undefined) updateLecturerData.ethnicity = ethnicity?.trim() || null
+
+        const updateLecturerInfo = await prisma.user.update({
             where: { id: lecturer.user.id },
             data: {
-                fullName: fullName.trim(),
-                email: email.trim(),
-                gender: gender,
-                avatar: avatarPath ? avatarPath : null,
-                dateOfBirth: parsedDateOfBirth,
-                phoneNumber: phoneNumber ? phoneNumber.trim() : null,
-                address: address ? address.trim() : null,
+                ...updateUserData,
                 lecturer: {
-                    update: {
-                        lecturerCode: lecturerCode.trim(),
-                        majorId: Number(majorId),
-                        facultyId: major.facultyId,
-                        degree: degree,
-                        position: position,
-                        citizenId: citizenId ? citizenId.trim() : null,
-                        placeOfBirth: placeOfBirth ? placeOfBirth.trim() : null,
-                        personalEmail: personalEmail ? personalEmail.trim() : null,
-                        ethnicity: ethnicity ? ethnicity.trim() : null,
-                        status: status
-                    }
+                    update: updateLecturerData
                 }
             },
             include: {
                 lecturer: true
             }
         })
-        return {
-            updateLecturer
-        }
+
+        return { updateLecturerInfo }
     },
     updateLecturerStatusActive: async (lecturerId) => {
         const lecturer = await prisma.lecturer.findUnique({
@@ -191,35 +240,82 @@ export const lecturerService = {
             updateLecturerStatus
         }
     },
-    getAllLecturers: async (lecturerCode, lecturerName, majorName, page) => {
+    getAllLecturers: async (lecturerCode, lecturerName, majorName,facultyName, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            role: 'LECTURER',
-            ...(lecturerCode ? {
-                leturer: {
-                    lecturerCode: { contains: lecturerCode.toLowerCase() }
+    role: 'LECTURER',
+
+    ...(lecturerName ? {
+        fullName: {
+            contains: lecturerName.toLowerCase(),
+        }
+    } : {}),
+
+    lecturer: {
+        ...(lecturerCode ? {
+            lecturerCode: {
+                contains: lecturerCode.toLowerCase(),
+            }
+        } : {}),
+
+        ...(majorName ? {
+            major: {
+                name: {
+                    contains: majorName.toLowerCase(),
                 }
-            } : {}),
-            ...(lecturerName ? {
-                fullName: { contains: lecturerName.toLowerCase() }
-            } : {}),
-            ...(lecturerCode ? {
-                leturer: {
-                    major: {
-                        name: { contains: majorName.toLowerCase() }
+            }
+        } : {}),
+
+        ...(facultyName ? {
+            major: {
+                faculty: {
+                    name: {
+                        contains: facultyName.toLowerCase(),
                     }
                 }
-            } : {}),
-        }
+            }
+        } : {})
+    }
+}
         const [lecturers, totalLecturers] = await prisma.$transaction([
             prisma.user.findMany({
                 where: whereCondition,
                 take: limit,
                 skip: skip,
                 orderBy: { createdAt: 'desc' },
-                include: {
-                    lecturer: true
+                select: {
+                    fullName: true,
+                    email: true,
+                    avatar: true,
+                    gender: true,
+                    dateOfBirth: true,
+                    phoneNumber: true,
+                    address: true,
+                    lecturer: {
+                        select: {
+                            id: true,
+                            lecturerCode: true,
+                            personalEmail: true,
+                            citizenId: true,
+                            placeOfBirth: true,
+                            ethnicity: true,
+                            degree: true,
+                            position: true,
+                            status: true,
+                            faculty: {
+                                select: {
+                                    name: true
+                                }
+                            },
+                            major: {
+                                select: {
+                                    name: true
+                                }
+                            }
+
+                        }
+                    }
                 }
             }),
             prisma.user.count({
@@ -309,6 +405,7 @@ export const lecturerService = {
         return {
             lecturers
         }
-    }
+    },
+    // getAllRequestPassued
 
 } 
