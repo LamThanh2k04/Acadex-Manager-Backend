@@ -13,6 +13,7 @@ import lecturerRouter from '../admin/lecturerRouter.js'
 import courseSectionRouter from '../admin/courseSectionRouter.js'
 import scheduleRouter from '../admin/scheduleRouter.js'
 import studentRouter from '../admin/studentRouter.js'
+import examScheduleRouter from '../admin/examScheduleRouter.js'
 const router = express.Router();
 
 router.use('/faculty', facultyRouter);
@@ -29,4 +30,5 @@ router.use('/lecturer',lecturerRouter)
 router.use('/courseSection',courseSectionRouter)
 router.use('/schedule',scheduleRouter)
 router.use('/student',studentRouter)
+router.use('/examSchedule',examScheduleRouter)
 export default router;

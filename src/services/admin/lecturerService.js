@@ -240,44 +240,44 @@ export const lecturerService = {
             updateLecturerStatus
         }
     },
-    getAllLecturers: async (lecturerCode, lecturerName, majorName,facultyName, page) => {
+    getAllLecturers: async (lecturerCode, lecturerName, majorName, facultyName, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-    role: 'LECTURER',
+            role: 'LECTURER',
 
-    ...(lecturerName ? {
-        fullName: {
-            contains: lecturerName.toLowerCase(),
-        }
-    } : {}),
-
-    lecturer: {
-        ...(lecturerCode ? {
-            lecturerCode: {
-                contains: lecturerCode.toLowerCase(),
-            }
-        } : {}),
-
-        ...(majorName ? {
-            major: {
-                name: {
-                    contains: majorName.toLowerCase(),
+            ...(lecturerName ? {
+                fullName: {
+                    contains: lecturerName.toLowerCase(),
                 }
-            }
-        } : {}),
+            } : {}),
 
-        ...(facultyName ? {
-            major: {
-                faculty: {
-                    name: {
-                        contains: facultyName.toLowerCase(),
+            lecturer: {
+                ...(lecturerCode ? {
+                    lecturerCode: {
+                        contains: lecturerCode.toLowerCase(),
                     }
-                }
+                } : {}),
+
+                ...(majorName ? {
+                    major: {
+                        name: {
+                            contains: majorName.toLowerCase(),
+                        }
+                    }
+                } : {}),
+
+                ...(facultyName ? {
+                    major: {
+                        faculty: {
+                            name: {
+                                contains: facultyName.toLowerCase(),
+                            }
+                        }
+                    }
+                } : {})
             }
-        } : {})
-    }
-}
+        }
         const [lecturers, totalLecturers] = await prisma.$transaction([
             prisma.user.findMany({
                 where: whereCondition,
@@ -406,6 +406,421 @@ export const lecturerService = {
             lecturers
         }
     },
-    // getAllRequestPassued
+    getAllRequestPauseLecturers: async (status, page) => {
+        const limit = 10
+        const skip = (Number(page) - 1) * limit
+        const whereCondition = {
+            ...(status ? {
+                status: status.toLowerCase()
+            } : {})
+        }
+        const requestPauseLecturers = await prisma.scheduleChangeRequest.findMany({
+            where: whereCondition,
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: skip,
+            include: {
+                lecturer: {
+                    select: {
+                        id: true,
+                        lecturerCode: true,
+                        user: {
+                            select: {
+                                fullName: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
+                schedule: {
+                    include: {
+                        courseSection: {
+                            include: {
+                                subject: {
+                                    select: { name: true }
+                                }
+                            }
+                        },
+                        room: {
+                            select: { name: true }
+                        }
+                    }
+                },
+            }
+        })
+        return {
+            requestPauseLecturers
+        }
+    },
+    getInfoPauseLecturer: async (requestLecturerId) => {
+        const requestInfoLecturer = await prisma.scheduleChangeRequest.findUnique({
+            where: { id: Number(requestLecturerId) },
+            include: {
+                lecturer: {
+                    select: {
+                        id: true,
+                        lecturerCode: true,
+                        user: {
+                            select: {
+                                fullName: true,
+                                email: true
+                            }
+                        }
+                    }
+                },
+                schedule: {
+                    include: {
+                        courseSection: {
+                            include: {
+                                subject: {
+                                    select: { name: true }
+                                }
+                            }
+                        },
+                        room: {
+                            select: { name: true }
+                        }
+                    }
+                },
+            }
+        })
+        if (!requestInfoLecturer) {
+            throw new NotFoundException("Không tìm thấy yêu cầu này")
+        }
+        const conflict = await prisma.schedule.findFirst({
+            where: {
+                id: { not: requestInfoLecturer.scheduleId },
 
-} 
+                dayOfWeek: requestInfoLecturer.proposedDayOfWeek,
+                isActive: true,
+
+                startTimeMinutes: { lt: requestInfoLecturer.proposedEndMinute },
+                endTimeMinutes: { gt: requestInfoLecturer.proposedStartMinute },
+                startDate: { lte: requestInfoLecturer.proposedDate },
+                endDate: { gte: requestInfoLecturer.proposedDate },
+
+                OR: [
+                    { roomId: requestInfoLecturer.proposedRoomId },
+                    { courseSectionId: requestInfoLecturer.schedule.courseSectionId },
+                    { requestedBy: requestInfoLecturer.requestedBy }
+                ]
+            }
+        })
+        return {
+            requestInfoLecturer,
+            conflict: conflict ? true : false,
+            conflictDetail: conflict || null
+        }
+    },
+    approveRequestPauseLecturer: async (requestLecturerId, adminId, data) => {
+        const { note } = data
+        const request = await prisma.scheduleChangeRequest.findUnique({
+            where: { id: Number(requestLecturerId) },
+            include: {
+                schedule: true
+            }
+        })
+        if (!request) {
+            throw new NotFoundException("Không tìm thấy yêu cầu này")
+        }
+        if (request.status !== 'PENDING') {
+            throw new BadrequestException("Yêu cầu đã được xử lý")
+        }
+        let newSchedule = null
+        if (request.proposedDate) {
+            const proposedDate = new Date(request.proposedDate)
+            newSchedule = await prisma.schedule.create({
+                data: {
+                    dayOfWeek: request.proposedDayOfWeek,
+                    startTimeMinutes: request.proposedStartMinute,
+                    endTimeMinutes: request.proposedEndMinute,
+                    startDate: proposedDate,
+                    endDate: proposedDate,
+                    roomId: request.proposedRoomId,
+                    type: request.proposedType,
+                    meetingLink: request.proposedMeetingLink || null,
+                    courseSectionId: request.schedule.courseSectionId,
+                    requestedBy: request.requestedBy,
+
+                    approvedBy: adminId,
+                    approvedAt: new Date()
+
+                }
+            })
+            await prisma.scheduleChangeRequest.update({
+                where: { id: Number(requestLecturerId) },
+                data: {
+                    status: "APPROVED",
+                    approvedBy: adminId,
+                    approvedAt: new Date(),
+                    note: note || null,
+                }
+            })
+            return {
+                newSchedule
+            }
+        }
+    },
+    rejectRequestPauseLecturer: async (requestLecturerId, adminId, data) => {
+        const { note } = data
+        const request = await prisma.scheduleChangeRequest.findUnique({
+            where: { id: Number(requestLecturerId) },
+            include: {
+                schedule: true
+            }
+        })
+        if (!request) {
+            throw new NotFoundException("Không tìm thấy yêu cầu này")
+        }
+        if (request.status !== 'PENDING') {
+            throw new BadrequestException("Yêu cầu đã được xử lý")
+        }
+        await prisma.scheduleChangeRequest.update({
+            where: { id: Number(requestLecturerId) },
+            data: {
+                status: "REJECTED",
+                approvedBy: adminId,
+                approvedAt: new Date(),
+                note: note || null,
+            }
+        })
+    },
+    getAllRequestChangeGradeLecturers: async (status, page) => {
+        const limit = 10
+        const skip = (Number(page) - 1) * limit
+
+        const whereCondition = {
+            ...(status ? {
+                status: status.toLowerCase()
+            } : {})
+        }
+        const requestChangeGradeLecturers = await prisma.gradeChangeRequest.findMany({
+            where: whereCondition,
+            take: limit,
+            skip,
+            orderBy: { createdAt: 'desc' },
+            select: {
+                id: true,
+                status: true,
+                note: true,
+                requestedAt: true,
+                approvedAt: true,
+                oldData: true,
+                newData: true,
+
+                lecturer: {
+                    select: {
+                        id: true,
+                        lecturerCode: true,
+                        user: {
+                            select: {
+                                fullName: true
+                            }
+                        }
+                    }
+                },
+
+                grade: {
+                    select: {
+                        id: true,
+                        totalScore: true,
+                        components: {
+                            select: {
+                                id: true,
+                                type: true,
+                                score: true,
+                                weight: true
+                            }
+                        },
+                        enrollment: {
+                            select: {
+                                student: {
+                                    select: {
+                                        studentCode: true,
+                                        user: {
+                                            select: {
+                                                fullName: true
+                                            }
+                                        }
+                                    }
+                                },
+                                courseSection: {
+                                    select: {
+                                        subject: {
+                                            select: {
+                                                name: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                admin: {
+                    select: {
+                        id: true,
+                        user: {
+                            select: {
+                                fullName: true
+                            }
+                        }
+                    }
+                },
+            }
+        })
+
+        return { requestChangeGradeLecturers }
+
+    },
+    getInfoRequestChangeGradeLecturer: async (requestLecturerId) => {
+        const requestInfoChangeGradeLecturer = await prisma.gradeChangeRequest.findUnique({
+            where: { id: Number(requestLecturerId) },
+             select: {
+                id: true,
+                status: true,
+                note: true,
+                requestedAt: true,
+                approvedAt: true,
+                oldData: true,
+                newData: true,
+
+                lecturer: {
+                    select: {
+                        id: true,
+                        lecturerCode: true,
+                        user: {
+                            select: {
+                                fullName: true
+                            }
+                        }
+                    }
+                },
+
+                grade: {
+                    select: {
+                        id: true,
+                        totalScore: true,
+                        components: {
+                            select: {
+                                id: true,
+                                type: true,
+                                score: true,
+                                weight: true
+                            }
+                        },
+                        enrollment: {
+                            select: {
+                                student: {
+                                    select: {
+                                        studentCode: true,
+                                        user: {
+                                            select: {
+                                                fullName: true
+                                            }
+                                        }
+                                    }
+                                },
+                                courseSection: {
+                                    select: {
+                                        subject: {
+                                            select: {
+                                                name: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        })
+        return {
+            requestInfoChangeGradeLecturer
+        }
+    },
+    approveRequestChangeGradeLecturer: async (requestLecturerId, adminId, data) => {
+        const { note } = data
+        const request = await prisma.gradeChangeRequest.findUnique({
+            where: { id: Number(requestLecturerId) }
+        })
+
+        if (!request) {
+            throw new NotFoundException("Không tìm thấy yêu cầu này")
+        }
+
+        if (request.status !== 'PENDING') {
+            throw new BadrequestException("Yêu cầu đã được xử lý")
+        }
+
+        const newData = request.newData
+
+        await prisma.$transaction(async (tx) => {
+
+            await tx.grade.update({
+                where: { id: request.gradeId },
+                data: {
+                    totalScore: newData.totalScore,
+                    gpaScale4: newData.gpaScale4,
+                    letterGrade: newData.letterGrade,
+                    classification: newData.classification,
+                    isEligibleForExam: newData.isEligibleForExam,
+                    isPassed: newData.isPassed
+                }
+            })
+
+            await tx.gradeComponent.deleteMany({
+                where: { gradeId: request.gradeId }
+            })
+
+            if (newData.components?.length) {
+                await tx.gradeComponent.createMany({
+                    data: newData.components.map(c => ({
+                        type: c.type,
+                        score: c.score,
+                        weight: c.weight,
+                        gradeId: request.gradeId
+                    }))
+                })
+            }
+
+            await tx.gradeChangeRequest.update({
+                where: { id: Number(requestLecturerId) },
+                data: {
+                    status: "APPROVED",
+                    approvedBy: adminId,
+                    approvedAt: new Date(),
+                    note: note || null
+                }
+            })
+
+        })
+    },
+    rejectRequestChangeGradeLecturer: async (requestLecturerId, adminId, data) => {
+
+        const { note } = data
+
+        const request = await prisma.gradeChangeRequest.findUnique({
+            where: { id: Number(requestLecturerId) }
+        })
+
+        if (!request) {
+            throw new NotFoundException("Không tìm thấy yêu cầu này")
+        }
+
+        if (request.status !== 'PENDING') {
+            throw new BadrequestException("Yêu cầu đã được xử lý")
+        }
+
+        await prisma.gradeChangeRequest.update({
+            where: { id: Number(requestLecturerId) },
+            data: {
+                status: "REJECTED",
+                approvedBy: adminId,
+                approvedAt: new Date(),
+                note: note || "Yêu cầu không được chấp thuận"
+            }
+        })
+    }
+}

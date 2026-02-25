@@ -295,5 +295,6 @@ export const scheduleService = {
                 totalPages: Math.ceil(totalSchedules / limit)
             }
         }
-    }
+    },
+    
 }

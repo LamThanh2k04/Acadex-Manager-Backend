@@ -38,43 +38,55 @@ export const authService = {
         };
     },
     login: async (data) => {
-        validateMissingFields(data, ['email', 'password'])
-        const { email, password, role } = data;
-        console.log(data)
-        validateEmail(email,role)
-        const user = await prisma.user.findUnique({ where: { email } })
+        validateMissingFields(data, ['identifier', 'password'])
+        const { identifier, password } = data;
+
+        let user = null
+
+        user = await prisma.user.findUnique({ where: { email: identifier } })
+
         if (!user) {
-            throw new NotFoundException("Không tìm thấy người dùng với email này")
+            const student = await prisma.student.findUnique({ where: { studentCode: identifier }, include: { user: true } })
+            if (student) {
+                user = student.user
+                console.log(user)
+            }
         }
-        if (user.role !== role) {
-            throw new BadrequestException(`Tài khoản này thuộc vai trò ${user.role}, không thể đăng nhập bằng giao diện ${role.toUpperCase()}`)
+        if (!user) {
+            const lecturer = await prisma.lecturer.findUnique({ where: { lecturerCode: identifier }, include: { user: true } })
+            if (lecturer) {
+                user = lecturer.user
+            }
         }
-        if(!user.isActive) {
-          let roleText = '';
-          switch(user.role) {
-            case 'ADMIN':
-              roleText = "quản trị viên";
-              break;
-            case 'STUDENT':
-              roleText = "sinh viên";
-              break;
-            case 'LECTURER':
-              roleText = "giảng viên";
-              break;
-            default:
-              roleText = "người dùng";
-          }
-          throw new BadrequestException(`Tài khoản ${roleText} này đã bị khóa.`);
+        if (!user) {
+            throw new NotFoundException("Không tìm thấy người dùng này")
         }
 
-        const isMatchPassword = await bcrypt.compare(password,user.password);
+        if (!user.isActive) {
+            let roleText = '';
+            switch (user.role) {
+                case 'ADMIN':
+                    roleText = "quản trị viên";
+                    break;
+                case 'STUDENT':
+                    roleText = "sinh viên";
+                    break;
+                case 'LECTURER':
+                    roleText = "giảng viên";
+                    break;
+                default:
+                    roleText = "người dùng";
+            }
+            throw new BadrequestException(`Tài khoản ${roleText} này đã bị khóa.`);
+        }
+
+        const isMatchPassword = await bcrypt.compare(password, user.password);
         if (!isMatchPassword) {
             throw new BadrequestException("Mật khẩu không đúng");
         }
-        const token = generateToken(user.id,user.role,user);
+        const token = generateToken(user.id, user.role, user);
         return {
             token
         };
-        
     }
 }
