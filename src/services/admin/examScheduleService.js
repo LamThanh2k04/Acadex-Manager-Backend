@@ -3,16 +3,16 @@ import prisma from "../../common/prisma/initPrisma.js"
 import validateMissingFields from "../../utils/validateFields.js"
 
 export const examScheduleService = {
-    getAvailableRooms: async (date, startMinute, endMinute) => {
+    getAvailableRooms: async (date, startTime, endTime) => {
         const examDate = new Date(date)
-        const startMinute = Number(startMinute)
-        const endMinute = Number(endMinute)
+        const startMinute = Number(startTime)
+        const endMinute = Number(endTime)
         const dayOfWeek = examDate.getDay()
         const examConflicts = await prisma.examSchedule.findMany({
             where: {
                 examDate: examDate,
-                startMinute: { lt: startMinute },
-                endMinute: { gt: endMinute }
+                startMinute: { lt: endMinute },
+                endMinute: { gt: startMinute }
             },
             select: { roomId: true }
         })
@@ -25,8 +25,8 @@ export const examScheduleService = {
                 dayOfWeek: dayOfWeek,
                 startDate: { lt: examDate },
                 endDate: { gt: examDate },
-                startMinute: { lte: endMinute },
-                endMinute: { gte: startMinute }
+                startTimeMinutes: { lte: endMinute },
+                endTimeMinutes: { gte: startMinute }
             },
             select: { roomId: true }
         })
@@ -67,9 +67,10 @@ export const examScheduleService = {
                         isActive: true
                     }
                 },
-                exam: {
-                    none: { isActive: true },
-                }
+                OR: [
+                    { exam: { is: null } },
+                    { exam: { is: { isActive: false } } }
+                ]
             },
             select: {
                 id: true,
@@ -83,7 +84,7 @@ export const examScheduleService = {
                     select: {
                         user: {
                             select: {
-                                name: true
+                                fullName: true
                             }
                         }
                     }
@@ -124,7 +125,7 @@ export const examScheduleService = {
         validateMissingFields(data, ['examDate', 'startMinute', 'endMinute', 'courseSectionId', 'roomId'])
         const { examDate, startMinute, endMinute, courseSectionId, roomId, note } = data
 
-        const dayOfWeek = examDate.getDay()
+        const dayOfWeek = new Date(examDate).getDay()
         const [courseSection, room] = await Promise.all([
             prisma.courseSection.findUnique({
                 where: { id: Number(courseSectionId) }
@@ -160,8 +161,8 @@ export const examScheduleService = {
                     dayOfWeek: dayOfWeek,
                     startDate: { lte: new Date(examDate) },
                     endDate: { gte: new Date(examDate) },
-                    startMinute: { lt: Number(endMinute) },
-                    endMinute: { gt: Number(startMinute) },
+                    startTimeMinutes: { lt: Number(endMinute) },
+                    endTimeMinutes: { gt: Number(startMinute) },
                 }
             }),
             prisma.examSchedule.findFirst({
@@ -187,7 +188,7 @@ export const examScheduleService = {
                 examDate: new Date(examDate),
                 startMinute: Number(startMinute),
                 endMinute: Number(endMinute),
-                note: note.trim() || null
+                note: note?.trim() || null
             }
         })
         return {
@@ -264,8 +265,8 @@ export const examScheduleService = {
                 dayOfWeek: dayOfWeek,
                 startDate: { lte: newExamDate },
                 endDate: { gte: newExamDate },
-                startMinute: { lt: newEnd },
-                endMinute: { gt: newStart }
+                startTimeMinutes: { lt: newEnd },
+                endTimeMinutes: { gt: newStart }
             }
         })
 
@@ -338,6 +339,7 @@ export const examScheduleService = {
                     note: true,
                     courseSection: {
                         select: {
+                            sectionCode : true,
                             subject: {
                                 select: {
                                     name: true
@@ -360,7 +362,7 @@ export const examScheduleService = {
         ])
         return {
             examSchedules,
-            pagination : {
+            pagination: {
                 page: Number(page),
                 limit: limit,
                 total: totalExamSchedules,

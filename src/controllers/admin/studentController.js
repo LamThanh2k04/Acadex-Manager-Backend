@@ -17,7 +17,7 @@ export const studentController = {
         try {
             const studentId = req.params.studentId
             const avatarPath = req.file?.path;
-            const data = await studentService.updateStudentInfo(studentId,req.body, avatarPath)
+            const data = await studentService.updateStudentInfo(studentId, req.body, avatarPath)
             const response = responseSuccess(data, "Cập nhật thông tin sinh viên thành công")
             res.status(response.status).json(response)
         } catch (err) {
@@ -26,7 +26,7 @@ export const studentController = {
         }
     },
     updateStudentStatusActive: async (req, res, next) => {
-         try {
+        try {
             const studentId = req.params.studentId
             const data = await studentService.updateStudentStatusActive(studentId)
             const response = responseSuccess(data, "Cập nhật trạng thái sinh viên thành công")
@@ -38,9 +38,9 @@ export const studentController = {
     },
     getAllStudents: async (req, res, next) => {
         try {
-            const {studentCode, studentName, programName, majorName, facultyName,className} = req.query
+            const { studentCode, studentName, programName, majorName, facultyName, className } = req.query
             const page = req.query.page || 1
-            const data = await studentService.getAllStudents(studentCode, studentName, programName, majorName, facultyName,className, page)
+            const data = await studentService.getAllStudents(studentCode, studentName, programName, majorName, facultyName, className, page)
             const response = responseSuccess(data, "Lấy danh sách sinh viên có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {
@@ -51,7 +51,7 @@ export const studentController = {
     resetPasswordStudent: async (req, res, next) => {
         try {
             const studentId = req.params.studentId
-            const data = await studentService.resetPasswordStudent(studentId,req.body)
+            const data = await studentService.resetPasswordStudent(studentId, req.body)
             const response = responseSuccess(data, "Đặt lại mật khẩu sinh viên thành công")
             res.status(response.status).json(response)
         } catch (err) {
@@ -59,5 +59,63 @@ export const studentController = {
             next(err)
         }
     },
-
+    getAllRequestCertificateStudents: async (req, res, next) => {
+        try {
+            const status = req.query.status
+            const page = req.query.page || 1
+            const data = await studentService.getAllRequestCertificateStudents(status, page)
+            const response = responseSuccess(data, "Lấy danh sách yêu cầu chứng chỉ thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy danh sách yêu cầu chứng chỉ thất bại", err)
+            next(err)
+        }
+    },
+    getInfoRequestCertificateStudent: async (req, res, next) => {
+        try {
+            const certificateId = req.params.certificateId
+            const data = await studentService.getInfoRequestCertificateStudent(certificateId)
+            const response = responseSuccess(data, "Lấy thông tin yêu cầu chứng chỉ thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy thông tin yêu cầu chứng chỉ thất bại", err)
+            next(err)
+        }
+    },
+    approveRequestCertificateStudent: async (req, res, next) => {
+        try {
+            const adminId = req.admin.id
+            const certificateId = req.params.certificateId
+            const data = await studentService.approveRequestCertificateStudent(certificateId, adminId, req.body)
+            const response = responseSuccess(data, "Duyệt yêu cầu chứng chỉ thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Duyệt yêu cầu chứng chỉ thất bại", err)
+            next(err)
+        }
+    },
+    rejectRequestCertificateStudent: async (req, res, next) => {
+        try {
+            const adminId = req.admin.id
+            const certificateId = req.params.certificateId
+            const data = await studentService.rejectRequestCertificateStudent(certificateId, adminId, req.body)
+            const response = responseSuccess(data, "Từ chối yêu cầu chứng chỉ thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Từ chối yêu cầu chứng chỉ thất bại", err)
+            next(err)
+        }
+    },
+    getStudentsTuitionStatus: async (req, res, next) => {
+        try {
+            const { semesterId, status } = req.query
+            const page = req.query.page || 1
+            const data = await studentService.getStudentsTuitionStatus(semesterId, status, page)
+            const response = responseSuccess(data, "Lấy danh sách sinh viên theo trạng thái học phí thành công")
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy danh sách sinh viên theo trạng thái học phí thất bại", err)
+            next(err)
+        }
+    }
 }

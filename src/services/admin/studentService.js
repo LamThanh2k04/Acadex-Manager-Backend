@@ -67,7 +67,7 @@ export const studentService = {
                 password: hashPasswrod,
                 gender: gender,
                 avatar: avatarPath ? avatarPath : null,
-                role : 'STUDENT',
+                role: 'STUDENT',
                 student: {
                     create: {
                         studentCode: studentCode.trim(),
@@ -239,7 +239,7 @@ export const studentService = {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-             role: 'STUDENT',
+            role: 'STUDENT',
             ...(studentName ? {
                 fullName: { contains: studentName.toLowerCase() }
             } : {}),
@@ -303,11 +303,11 @@ export const studentService = {
                             status: true,
                             class: {
                                 select: {
-                                    homeroomLecturer : {
-                                        select : {
-                                            user : {
-                                                select : {
-                                                        fullName : true
+                                    homeroomLecturer: {
+                                        select: {
+                                            user: {
+                                                select: {
+                                                    fullName: true
                                                 }
                                             }
                                         }
@@ -368,6 +368,223 @@ export const studentService = {
         })
         return {
             resetPassword
+        }
+    },
+    getAllRequestCertificateStudents: async (status, page) => {
+        const limit = 10
+        const skip = (Number(page) - 1) * limit
+        const whereCondition = {
+            ...(status ? {
+                status: status.toLowerCase()
+            } : {})
+        }
+        const [requestCertificates, totalRequestCertificates] = await Promise.all([
+            prisma.certificate.findMany({
+                where: whereCondition,
+                take: limit,
+                skip: skip,
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    fileUrl: true,
+                    issueDate: true,
+                    description: true,
+                    status: true,
+                    student: {
+                        select: {
+                            studentCode: true,
+                            user: {
+                                select: {
+                                    fullName: true
+                                }
+                            }
+                        }
+                    },
+                    template: {
+                        select: {
+                            name: true,
+                        }
+                    }
+                }
+            }),
+            prisma.certificate.count({
+                where: whereCondition
+            })
+        ])
+        return {
+            requestCertificates,
+            pagination: {
+                page: Number(page),
+                limit: limit,
+                total: totalRequestCertificates,
+                totalPages: Math.ceil(totalRequestCertificates / limit)
+            }
+        }
+    },
+    getInfoRequestCertificateStudent: async (certificateId) => {
+        const certificateInfo = await prisma.certificate.findUnique({
+            where: { id: Number(certificateId) },
+            select: {
+                id: true,
+                fileUrl: true,
+                issueDate: true,
+                description: true,
+                status: true,
+                student: {
+                    select: {
+                        studentCode: true,
+                        user: {
+                            select: {
+                                fullName: true
+                            }
+                        }
+                    }
+                },
+                template: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        })
+        return {
+            certificateInfo
+        }
+    },
+    approveRequestCertificateStudent: async (certificateId, adminId, data) => {
+        const { note } = data
+        const certificate = await prisma.certificate.findUnique({
+            where: { id: Number(certificateId) }
+        })
+        if (!certificate) {
+            throw new NotFoundException("Không tìm thấy yêu cầu cấp chứng chỉ này")
+        }
+        if (certificate.status !== "PENDING") {
+            throw new BadrequestException("Yêu cầu cấp chứng chỉ đã được xử lý")
+        }
+        const updatedCertificate = await prisma.certificate.update({
+            where: { id: Number(certificateId) },
+            data: {
+                status: "ISSUED",
+                checkedAt: new Date(),
+                checkedBy: adminId,
+                note: note?.trim() || null
+            }
+        })
+        return {
+            updatedCertificate
+        }
+    },
+    rejectRequestCertificateStudent: async (certificateId, adminId, data) => {
+        const { note } = data
+        const certificate = await prisma.certificate.findUnique({
+            where: { id: Number(certificateId) }
+        })
+        if (!certificate) {
+            throw new NotFoundException("Không tìm thấy yêu cầu cấp chứng chỉ này")
+        }
+        if (certificate.status !== "PENDING") {
+            throw new BadrequestException("Yêu cầu cấp chứng chỉ đã được xử lý")
+        }
+        const updatedCertificate = await prisma.certificate.update({
+            where: { id: Number(certificateId) },
+            data: {
+                status: "REVOKED",
+                checkedAt: new Date(),
+                checkedBy: adminId,
+                note: note?.trim() || null
+            }
+        })
+        return updatedCertificate
+    },
+    getStudentsTuitionStatus: async (semesterId, status, page) => {
+        const limit = 10
+        const skip = (Number(page) - 1) * limit
+
+        const students = await prisma.student.findMany({
+            select: {
+                studentCode: true,
+                user: {
+                    select: {
+                        fullName: true
+                    }
+                },
+                enrollments: {
+                    where: {
+                        status: 'REGISTERED',
+                        ...(semesterId && {
+                            courseSection: {
+                                ...(semesterId ? { semesterId: Number(semesterId) } : {})
+                            }
+                        })
+                    },
+                    select: {
+                        fee: true
+                    }
+                },
+                tuitionFees: {
+                    where: {
+                     ...(semesterId ? { semesterId: Number(semesterId) } : {})
+                      
+                    },
+                    select: {
+                        payments: {
+                            where: {
+                                status: 'SUCCESS'
+                            },
+                            select: {
+                                amount: true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+        const calculated = students.map(student => {
+            const totalCourseFee = student.enrollments.reduce(
+                (total, enrollment) => total + enrollment.fee,
+                0
+            )
+
+            const paidAmount = student.tuitionFees.reduce((sum, tf) => {
+                const paymentSum = tf.payments.reduce(
+                    (s, p) => s + p.amount,
+                    0
+                )
+                return sum + paymentSum
+            }, 0)
+
+            const remainingAmount = totalCourseFee - paidAmount
+
+            let statusResult = "PAID"
+            if (remainingAmount > 0) statusResult = "UNPAID"
+
+            return {
+                studentCode: student.studentCode,
+                fullName: student.user.fullName,
+                totalCourseFee,
+                paidAmount,
+                remainingAmount,
+                status: statusResult
+            }
+        })
+
+        const filtered = status
+            ? calculated.filter(s => s.status === status)
+            : calculated
+
+        const total = filtered.length
+        const studentsPaginated = filtered.slice(skip, skip + limit)
+
+        return {
+            students: studentsPaginated,
+            pagination: {
+                page: Number(page),
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
         }
     }
 }

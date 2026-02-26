@@ -4,8 +4,8 @@ import { examScheduleController } from '../../controllers/admin/examScheduleCont
 const router = express.Router()
 
 router.get('/getAvailableRooms', examScheduleController.getAvailableRooms)
-router.get('/getCourseSectionHaveSchedule', examScheduleController.getCourseSectionHaveSchedule)
-router.get('/suggestExamSchedule', examScheduleController.suggestExamSchedule)
+router.get('/getCourseSectionHaveSchedule/:semesterId', examScheduleController.getCourseSectionHaveSchedule)
+router.get('/suggestExamSchedule/:courseSectionId', examScheduleController.suggestExamSchedule)
 router.post('/createExamSchedule', examScheduleController.createExamSchedule)
 router.put('/updateExamScheduleInfo/:examScheduleId', examScheduleController.updateExamScheduleInfo)
 router.put('/updateExamScheduleStatus/:examScheduleId', examScheduleController.updateExamScheduleStatus)

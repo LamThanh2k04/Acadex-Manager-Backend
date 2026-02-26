@@ -4,8 +4,8 @@ import { examScheduleService } from "../../services/admin/examScheduleService.js
 export const examScheduleController = {
     getAvailableRooms: async (req, res, next) => {
         try {
-            const { date, startMinute, endMinute } = req.query
-            const data = await examScheduleService.getAvailableRooms(date, startMinute, endMinute)
+            const { date, startTime, endTime } = req.query
+            const data = await examScheduleService.getAvailableRooms(date, startTime, endTime)
             const response = responseSuccess(data, "Lấy danh sách phòng thi trống thành công")
             res.status(response.status).json(response)
         } catch (err) {
@@ -15,7 +15,7 @@ export const examScheduleController = {
     },
     getCourseSectionHaveSchedule: async (req, res, next) => {
         try {
-            const semesterId = req.query.semesterId
+            const semesterId = req.params.semesterId
             const data = await examScheduleService.getCourseSectionHaveSchedule(semesterId)
             const response = responseSuccess(data, "Lấy danh sách học phần có lịch học thành công")
             res.status(response.status).json(response)
@@ -26,7 +26,7 @@ export const examScheduleController = {
     },
     suggestExamSchedule: async (req, res, next) => {
         try {
-            const courseSectionId = req.query.courseSectionId
+            const courseSectionId = req.params.courseSectionId
             const data = await examScheduleService.suggestExamSchedule(courseSectionId)
             const response = responseSuccess(data, "Đề xuất lịch thi thành công")
             res.status(response.status).json(response)

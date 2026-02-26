@@ -9,4 +9,9 @@ router.post('/updateStudentInfo/:studentId', upload.single('avatar'), studentCon
 router.put('/updateStudentStatusActive/:studentId', studentController.updateStudentStatusActive)
 router.get('/getAllStudents', studentController.getAllStudents)
 router.put('/resetPasswordStudent/:studentId', studentController.resetPasswordStudent)
+router.get('/getAllRequestCertificateStudents',studentController.getAllRequestCertificateStudents)
+router.get('/getInfoRequestCertificateStudent/:certificateId',studentController.getInfoRequestCertificateStudent)
+router.post('/approveRequestCertificate/:certificateId',studentController.approveRequestCertificateStudent)
+router.post('/rejectRequestCertificate/:certificateId',studentController.rejectRequestCertificateStudent)
+router.get('/getStudentsTuitionStatus',studentController.getStudentsTuitionStatus)
 export default router
