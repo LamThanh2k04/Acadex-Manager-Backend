@@ -502,38 +502,61 @@ export const studentService = {
         const skip = (Number(page) - 1) * limit
 
         const students = await prisma.student.findMany({
+            where: {
+                enrollments: {
+                    some: {
+                        status: 'REGISTERED',
+                        ...(semesterId && {
+                            courseSection: {
+                                semesterId: Number(semesterId)
+                            }
+                        })
+                    }
+                }
+            },
             select: {
                 studentCode: true,
                 user: {
-                    select: {
-                        fullName: true
-                    }
+                    select: { fullName: true }
                 },
                 enrollments: {
                     where: {
                         status: 'REGISTERED',
                         ...(semesterId && {
                             courseSection: {
-                                ...(semesterId ? { semesterId: Number(semesterId) } : {})
+                                semesterId: Number(semesterId)
                             }
                         })
                     },
                     select: {
-                        fee: true
-                    }
-                },
-                tuitionFees: {
-                    where: {
-                     ...(semesterId ? { semesterId: Number(semesterId) } : {})
-                      
-                    },
-                    select: {
-                        payments: {
-                            where: {
-                                status: 'SUCCESS'
-                            },
+                        fee: true,
+                        courseSection: {
                             select: {
-                                amount: true
+                                sectionCode: true,
+                                semester: {
+                                    select: {
+                                        name: true,
+                                        academicYear: true
+                                    }
+                                },
+                                subject: {
+                                    select: {
+                                        code: true,
+                                        name: true,
+                                        credits: true
+                                    }
+                                }
+                            }
+                        },
+                        payments: {
+                            select: {
+                                payment: {
+                                    select: {
+                                        id: true,
+                                        amount: true,
+                                        status: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -542,24 +565,38 @@ export const studentService = {
         })
 
         const calculated = students.map(student => {
+
+            // 1️⃣ Tổng tiền học phần
             const totalCourseFee = student.enrollments.reduce(
-                (total, enrollment) => total + enrollment.fee,
+                (sum, e) => sum + e.fee,
                 0
             )
 
-            const paidAmount = student.tuitionFees.reduce((sum, tf) => {
-                const paymentSum = tf.payments.reduce(
-                    (s, p) => s + p.amount,
-                    0
-                )
-                return sum + paymentSum
-            }, 0)
+            // 2️⃣ Lấy danh sách payment unique
+            const paymentMap = new Map()
+
+            student.enrollments.forEach(enrollment => {
+                enrollment.payments.forEach(pe => {
+                    const payment = pe.payment
+                    if (payment && payment.status === "SUCCESS") {
+                        paymentMap.set(payment.id, payment.amount)
+                    }
+                })
+            })
+
+            // 3️⃣ Tổng tiền đã đóng (không bị lặp)
+            const paidAmount = Array.from(paymentMap.values())
+                .reduce((sum, amount) => sum + amount, 0)
 
             const remainingAmount = totalCourseFee - paidAmount
 
             let statusResult = "PAID"
-            if (remainingAmount > 0) statusResult = "UNPAID"
 
+            if (totalCourseFee === 0) {
+                statusResult = "NO_COURSE"
+            } else if (remainingAmount > 0) {
+                statusResult = "UNPAID"
+            }
             return {
                 studentCode: student.studentCode,
                 fullName: student.user.fullName,

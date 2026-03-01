@@ -205,7 +205,6 @@ model Student {
   program Program? @relation(fields: [programId], references: [id])
 
   enrollments            Enrollment[]
-  tuitionFees            TuitionFee[]
   certificates           Certificate[]
   graduationApps         GraduationApplication[]
   attendances            Attendance[]
@@ -360,7 +359,6 @@ model Semester {
   updatedAt    DateTime @updatedAt
 
   courseSections         CourseSection[]
-  tuitionFees            TuitionFee[]
   studyPauseApplications StudyPauseApplication[]
 }
 
@@ -470,10 +468,10 @@ model Enrollment {
   studentId       Int
   courseSectionId Int
 
-  student       Student       @relation(fields: [studentId], references: [id])
-  courseSection CourseSection @relation(fields: [courseSectionId], references: [id])
-
-  grades Grade[]
+  student       Student             @relation(fields: [studentId], references: [id])
+  courseSection CourseSection       @relation(fields: [courseSectionId], references: [id])
+  grades        Grade[]
+  payments      PaymentEnrollment[]
 }
 
 model Grade {
@@ -577,25 +575,6 @@ model ExamSchedule {
   room          Room          @relation(fields: [roomId], references: [id])
 }
 
-model TuitionFee {
-  id              Int           @id @default(autoincrement())
-  amount          Float
-  remainingAmount Float
-  status          TuitionStatus @default(UNPAID)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  studentId  Int
-  semesterId Int
-
-  student  Student  @relation(fields: [studentId], references: [id])
-  semester Semester @relation(fields: [semesterId], references: [id])
-
-  payments Payment[]
-
-  @@unique([studentId, semesterId])
-}
-
 model Payment {
   id        Int           @id @default(autoincrement())
   method    PaymentMethod @default(VNPAY)
@@ -609,8 +588,19 @@ model Payment {
   bankCode         String?
   payDate          DateTime?
 
-  tuitionFeeId Int
-  tuitionFee   TuitionFee @relation(fields: [tuitionFeeId], references: [id])
+  enrollments PaymentEnrollment[]
+}
+
+model PaymentEnrollment {
+  id Int @id @default(autoincrement())
+
+  paymentId    Int
+  enrollmentId Int
+
+  payment    Payment    @relation(fields: [paymentId], references: [id])
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id])
+
+  @@unique([paymentId, enrollmentId])
 }
 
 model Building {
