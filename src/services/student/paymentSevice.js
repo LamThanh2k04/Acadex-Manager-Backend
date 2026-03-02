@@ -211,7 +211,7 @@ export const paymentSecvice = {
         if (!student) {
             throw new NotFoundException("Không tìm thấy học sinh này")
         }
-        const enrollment = await prisma.enrollment.findMany({
+        const enrollments = await prisma.enrollment.findMany({
             where: {
                 studentId: student.id,
                 status: "REGISTERED",
@@ -224,7 +224,7 @@ export const paymentSecvice = {
                 })
             },
             select: {
-                fee : true,
+                fee: true,
                 isPaid: true,
                 status: true,
                 enrolledAt: true,
@@ -262,8 +262,45 @@ export const paymentSecvice = {
                 }
             }
         })
+        const total = enrollments.reduce((acc,curr) => (
+            acc + curr.fee
+        ),0)
+        const result = {}
+
+        for (const item of enrollments) {
+            const semester = item.courseSection.semester
+            const subject = item.courseSection.subject
+            const key = semester.id
+
+            if (!result[key]) {
+                result[key] = {
+                    semesterId: semester.id,
+                    semesterName: semester.name,
+                    academicYear: semester.academicYear,
+                    enrollments: [],
+                    totalCredits: 0,
+                    totalFee: 0
+                }
+            }
+
+            result[key].enrollments.push({
+                sectionCode : item.courseSection.sectionCode,
+                subjectCode: subject.code,
+                subjectName: subject.name,
+                credits: subject.credits,
+                fee: item.fee,
+                status : item.status,
+                 payDate: item.payments[0]?.payment?.payDate || null
+            })
+
+            result[key].totalCredits += subject.credits || 0
+            result[key].totalFee += item.fee || 0
+        }
+
+        const enrollment = Object.values(result)
         return {
-            enrollment
+            enrollment,
+            total
         }
     }
 }

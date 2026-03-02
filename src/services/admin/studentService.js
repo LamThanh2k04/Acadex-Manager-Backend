@@ -370,12 +370,12 @@ export const studentService = {
             resetPassword
         }
     },
-    getAllRequestCertificateStudents: async (status, page) => {
+    getAllRequestCertificatesStudents: async (status, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
             ...(status ? {
-                status: status.toLowerCase()
+                status: status
             } : {})
         }
         const [requestCertificates, totalRequestCertificates] = await Promise.all([
@@ -402,6 +402,7 @@ export const studentService = {
                     },
                     template: {
                         select: {
+                            code : true,
                             name: true,
                         }
                     }
@@ -462,7 +463,7 @@ export const studentService = {
         if (certificate.status !== "PENDING") {
             throw new BadrequestException("Yêu cầu cấp chứng chỉ đã được xử lý")
         }
-        const updatedCertificate = await prisma.certificate.update({
+        const approveCertificate = await prisma.certificate.update({
             where: { id: Number(certificateId) },
             data: {
                 status: "ISSUED",
@@ -472,7 +473,7 @@ export const studentService = {
             }
         })
         return {
-            updatedCertificate
+            approveCertificate
         }
     },
     rejectRequestCertificateStudent: async (certificateId, adminId, data) => {
@@ -486,7 +487,7 @@ export const studentService = {
         if (certificate.status !== "PENDING") {
             throw new BadrequestException("Yêu cầu cấp chứng chỉ đã được xử lý")
         }
-        const updatedCertificate = await prisma.certificate.update({
+        const rejectCertificate = await prisma.certificate.update({
             where: { id: Number(certificateId) },
             data: {
                 status: "REVOKED",
@@ -495,7 +496,7 @@ export const studentService = {
                 note: note?.trim() || null
             }
         })
-        return updatedCertificate
+        return rejectCertificate
     },
     getStudentsTuitionStatus: async (semesterId, status, page) => {
         const limit = 10

@@ -705,8 +705,6 @@ model Certificate {
   student  Student             @relation(fields: [studentId], references: [id])
   template CertificateTemplate @relation(fields: [templateId], references: [id])
   admin    User?               @relation(fields: [checkedBy], references: [id])
-
-  @@unique([studentId, templateId])
 }
 
 model GraduationApplication {

@@ -59,11 +59,11 @@ export const studentController = {
             next(err)
         }
     },
-    getAllRequestCertificateStudents: async (req, res, next) => {
+    getAllRequestCertificatesStudents: async (req, res, next) => {
         try {
             const status = req.query.status
             const page = req.query.page || 1
-            const data = await studentService.getAllRequestCertificateStudents(status, page)
+            const data = await studentService.getAllRequestCertificatesStudents(status, page)
             const response = responseSuccess(data, "Lấy danh sách yêu cầu chứng chỉ thành công")
             res.status(response.status).json(response)
         } catch (err) {
@@ -84,7 +84,7 @@ export const studentController = {
     },
     approveRequestCertificateStudent: async (req, res, next) => {
         try {
-            const adminId = req.admin.id
+            const adminId = req.user.id
             const certificateId = req.params.certificateId
             const data = await studentService.approveRequestCertificateStudent(certificateId, adminId, req.body)
             const response = responseSuccess(data, "Duyệt yêu cầu chứng chỉ thành công")
@@ -96,7 +96,7 @@ export const studentController = {
     },
     rejectRequestCertificateStudent: async (req, res, next) => {
         try {
-            const adminId = req.admin.id
+            const adminId = req.user.id
             const certificateId = req.params.certificateId
             const data = await studentService.rejectRequestCertificateStudent(certificateId, adminId, req.body)
             const response = responseSuccess(data, "Từ chối yêu cầu chứng chỉ thành công")
