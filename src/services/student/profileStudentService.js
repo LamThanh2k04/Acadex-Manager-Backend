@@ -13,6 +13,7 @@ export const profileStudentService = {
                 dateOfBirth: true,
                 phoneNumber: true,
                 address: true,
+                isActive : true,
                 student: {
                     select: {
                         id: true,
@@ -40,16 +41,19 @@ export const profileStudentService = {
                         },
                         program: {
                             select: {
+                                code : true,
                                 name: true
                             }
                         },
                         faculty: {
                             select: {
+                                code : true,
                                 name: true
                             }
                         },
                         major: {
                             select: {
+                                code : true,
                                 name: true
                             }
                         },

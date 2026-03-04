@@ -470,7 +470,7 @@ model Enrollment {
 
   student       Student             @relation(fields: [studentId], references: [id])
   courseSection CourseSection       @relation(fields: [courseSectionId], references: [id])
-  grades        Grade[]
+  grades        Grade?
   payments      PaymentEnrollment[]
 }
 
@@ -483,10 +483,11 @@ model Grade {
   isEligibleForExam Boolean?
   isPassed          Boolean?
   isActive          Boolean  @default(true)
+  isConfirmed       Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  enrollmentId Int
+  enrollmentId Int        @unique
   enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
 
   components         GradeComponent[]
@@ -503,6 +504,8 @@ model GradeComponent {
 
   gradeId Int
   grade   Grade @relation(fields: [gradeId], references: [id])
+
+  @@unique([gradeId, type])
 }
 
 model GradeChangeRequest {
@@ -510,7 +513,8 @@ model GradeChangeRequest {
   oldData     Json
   newData     Json
   status      GradeChangeStatus @default(PENDING)
-  note        String?
+  reason      String?
+  adminNote   String?
   requestedAt DateTime          @default(now())
   approvedAt  DateTime?
   createdAt   DateTime          @default(now())
