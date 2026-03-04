@@ -45,7 +45,7 @@ export const dashboardController = {
             next(err)
         }
     },
-    getTopStudentGpa : async () => {
+    getTopStudentGpa : async (req,res,next) => {
         try {
             const data = await dashboardService.getTopStudentGpa()
             const response = responseSuccess(data, "Lấy top học sinh có gpa cao nhất thành công")

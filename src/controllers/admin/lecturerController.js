@@ -174,5 +174,15 @@ export const lecturerController = {
             next(err)
         }
     },
+    getOverViewLecturer : async (req,res,next) => {
+        try {
+            const data = await lecturerService.getOverViewLecturer()
+            const response = responseSuccess(data,'Lấy tổng quan giảng viên thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy tổng quan giảng viên thất bại',err)
+            next(err)
+        }
+    }
 
 }

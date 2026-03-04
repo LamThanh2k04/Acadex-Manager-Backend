@@ -14,4 +14,5 @@ router.get('/getInfoRequestCertificateStudent/:certificateId',studentController.
 router.post('/approveRequestCertificate/:certificateId',studentController.approveRequestCertificateStudent)
 router.post('/rejectRequestCertificate/:certificateId',studentController.rejectRequestCertificateStudent)
 router.get('/getStudentsTuitionStatus',studentController.getStudentsTuitionStatus)
+router.get('/getOverViewStudent', studentController.getOverViewStudent)
 export default router

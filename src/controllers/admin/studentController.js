@@ -117,5 +117,15 @@ export const studentController = {
             console.error("Lấy danh sách sinh viên theo trạng thái học phí thất bại", err)
             next(err)
         }
+    },
+    getOverViewStudent: async (req, res, next) => {
+        try {
+            const data = await studentService.getOverViewStudent()
+            const response = responseSuccess(data, 'Lấy tổng quan sinh viên thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy tổng quan sinh viên thất bại', err)
+            next(err)
+        }
     }
 }

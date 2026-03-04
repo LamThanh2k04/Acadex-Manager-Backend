@@ -624,5 +624,28 @@ export const studentService = {
                 totalPages: Math.ceil(total / limit)
             }
         }
+    },
+     getOverViewStudent: async () => {
+        const [totalStudent,male,female,accountLooked] = await Promise.all([
+            prisma.user.count({
+                where : {role : 'STUDENT'}
+            }),
+             prisma.user.count({
+                where : {role : 'STUDENT', gender : 'MALE'},
+
+            }),
+             prisma.user.count({
+                where : {role : 'STUDENT', gender : 'FEMALE'}
+            }),
+             prisma.user.count({
+                where : {role : 'STUDENT', isActive : false}
+            }),
+        ])
+        return {
+            totalStudent,
+            male,
+            female,
+            accountLooked
+        }
     }
 }

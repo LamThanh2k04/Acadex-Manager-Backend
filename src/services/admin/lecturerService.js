@@ -822,5 +822,28 @@ export const lecturerService = {
                 note: note || "Yêu cầu không được chấp thuận"
             }
         })
+    },
+    getOverViewLecturer: async () => {
+        const [totalLecturer,male,female,accountLooked] = await Promise.all([
+            prisma.user.count({
+                where : {role : 'LECTURER'}
+            }),
+             prisma.user.count({
+                where : {role : 'LECTURER', gender : 'MALE'},
+
+            }),
+             prisma.user.count({
+                where : {role : 'LECTURER', gender : 'FEMALE'}
+            }),
+             prisma.user.count({
+                where : {role : 'LECTURER', isActive : false}
+            }),
+        ])
+        return {
+            totalLecturer,
+            male,
+            female,
+            accountLooked
+        }
     }
 }

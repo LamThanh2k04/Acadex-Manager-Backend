@@ -89,10 +89,16 @@ export const dashboardService = {
     getTopStudentGpa: async () => {
         const limit = 5
         const students = await prisma.student.findMany({
+            where: {
+                gpa: {
+                    not: null
+                }
+            },
             orderBy: { gpa: 'desc' },
             take: limit,
             select: {
                 studentCode: true,
+                gpa: true,
                 user: {
                     select: {
                         fullName: true

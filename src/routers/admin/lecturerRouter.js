@@ -18,4 +18,5 @@ router.get('/getAllRequestChangeGradeLecturers', lecturerController.getAllReques
 router.get('/getInfoRequestChangeGradeLecturer/:requestLecturerId', lecturerController.getInfoRequestChangeGradeLecturer)
 router.put('/approveRequestChangeGradeLecturer/:requestLecturerId', lecturerController.approveRequestChangeGradeLecturer)
 router.put('/rejectRequestChangeGradeLecturer/:requestLecturerId', lecturerController.rejectRequestChangeGradeLecturer)
+router.get('/getOverViewLecturer', lecturerController.getOverViewLecturer)
 export default router
