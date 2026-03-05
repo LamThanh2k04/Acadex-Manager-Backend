@@ -36,10 +36,9 @@ export const buildingController = {
     },
     getAllBuildings: async (req, res, next) => {
         try {
-            const buildingName = req.query.buildingName || ""
-            const buildingLocation = req.query.buildingLocation || ""
+            const search = req.query.search || ""
             const page = req.query.page || 1
-            const data = await buildingService.getAllBuildings(buildingName, buildingLocation, page)
+            const data = await buildingService.getAllBuildings(search, page)
             const response = responseSuccess(data, "Lấy danh sách cơ sở có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

@@ -235,44 +235,27 @@ export const studentService = {
             updateStudentStatusActive
         }
     },
-    getAllStudents: async (studentCode, studentName, programName, majorName, facultyName, className, page) => {
+    getAllStudents: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
             role: 'STUDENT',
-            ...(studentName ? {
-                fullName: { contains: studentName.toLowerCase() }
-            } : {}),
-
-            student: {
-                ...(studentCode ? {
-                    studentCode: { contains: studentCode.toLowerCase() }
-                } : {}),
-
-                ...(programName ? {
-                    program: {
-                        name: { contains: programName.toLowerCase() }
+           ...(search ? {
+                OR: [
+                    {
+                        fullName: {
+                            contains: search.toLowerCase()
+                        }
+                    },
+                    {
+                        student: {
+                            studentCode: {
+                                contains: search.toLowerCase()
+                            }
+                        }
                     }
-                } : {}),
-
-                ...(majorName ? {
-                    major: {
-                        name: { contains: majorName.toLowerCase() }
-                    }
-                } : {}),
-
-                ...(facultyName ? {
-                    faculty: {
-                        name: { contains: facultyName.toLowerCase() }
-                    }
-                } : {}),
-
-                ...(className ? {
-                    class: {
-                        name: { contains: className.toLowerCase() }
-                    }
-                } : {})
-            }
+                ]
+            } : {})
         }
         const [students, totalStudents] = await Promise.all([
             prisma.user.findMany({
@@ -349,7 +332,8 @@ export const studentService = {
             }
         }
     },
-    resetPasswordStudent: async (studentId, newPassword) => {
+    resetPasswordStudent: async (studentId, data) => {
+        const {newPassword} = data
         const student = await prisma.student.findUnique({
             where: { id: Number(studentId) },
             include: {

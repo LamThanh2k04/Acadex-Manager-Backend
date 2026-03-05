@@ -36,11 +36,12 @@ export const scheduleController = {
     },
     getAllSchedules: async (req, res, next) => {
         try {
-            const { courseSectionCode, type } = req.query
+            const search = req.query.search || ""
+            const type = req.query.type || ""
             const semesterId = req.query.semesterId
-            const dayOfweek = req.query.dayOfweek
+            const dayOfWeek = req.query.dayOfWeek
             const page = req.query.page || 1
-            const data = await scheduleService.getAllSchedules(courseSectionCode, type, semesterId, dayOfweek, page)
+            const data = await scheduleService.getAllSchedules(search, semesterId, type, dayOfWeek, page)
             const response = responseSuccess(data, "Lấy danh sách lịch của học phần có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

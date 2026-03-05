@@ -310,21 +310,36 @@ export const examScheduleService = {
             updateExamScheduleStatus
         }
     },
-    getAllExamSchedules: async (courseSectionCode, roomName, page) => {
+    getAllExamSchedules: async (search,page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit;
-        const whereCondition = {
-            ...(courseSectionCode ? {
-                courseSection: {
-                    courseCode: { contains: courseSectionCode.toLowerCase() }
+        const whereCondition = search ? {
+            OR: [
+                {
+                    courseSection: {
+                        sectionCode: {
+                            contains: search.toLowerCase()
+                        }
+                    }
+                },
+                {
+                    courseSection: {
+                        subject: {
+                            name: {
+                                contains: search.toLowerCase()
+                            }
+                        }
+                    }
+                },
+                {
+                    room: {
+                        name: {
+                            contains : search.toLowerCase()
+                        }
+                    }
                 }
-            } : {}),
-            ...(roomName ? {
-                room: {
-                    name: { contains: roomName.toLowerCase() }
-                }
-            } : {})
-        }
+            ]
+        } : {}
         const [examSchedules, totalExamSchedules] = await Promise.all([
             prisma.examSchedule.findMany({
                 where: whereCondition,
@@ -339,7 +354,7 @@ export const examScheduleService = {
                     note: true,
                     courseSection: {
                         select: {
-                            sectionCode : true,
+                            sectionCode: true,
                             subject: {
                                 select: {
                                     name: true

@@ -37,11 +37,9 @@ export const majorController = {
     },
     getAllMajors: async (req, res, next) => {
         try {
-            const majorName = req.query.majorName || "";
-            const facultyId = req.query.facultyId
+            const search = req.query.search || "";
             const page = req.query.page || 1;
-
-            const data = await majorService.getAllMajors(majorName,facultyId, page)
+            const data = await majorService.getAllMajors(search,page)
             const response = responseSuccess(data, "Lấy danh sách ngành có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

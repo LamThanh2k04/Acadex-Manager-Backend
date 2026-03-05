@@ -36,10 +36,9 @@ export const semesterController = {
     },
     getAllSemesters: async (req, res, next) => {
         try {
-            const semesterName = req.query.semesterName || ""
-            const semesterYear = req.query.semesterYear || ""
+            const search = req.query.search || ""
             const page = req.query.page || 1
-            const data = await semesterService.getAllSemesters(semesterName, semesterYear, page)
+            const data = await semesterService.getAllSemesters(search, page)
             const response = responseSuccess(data, 'Lấy danh sách học kì có phân trang thành công')
             res.status(response.status).json(response)
         } catch (err) {

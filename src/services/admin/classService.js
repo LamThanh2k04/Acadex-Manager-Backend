@@ -141,24 +141,27 @@ export const classService = {
             updateClassStatus
         }
     },
-    getAllClasses: async (className, majorName, homeroomLecturerName, page) => {
+    getAllClasses: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
-        const whereCondition = {
-            ...(className ? { name: { contains: className.toLowerCase() } } : {}),
-            ...(majorName ? {
-                major: {
-                    name: { contains: majorName.toLowerCase() }
-                }
-            } : {}),
-            ...(homeroomLecturerName ? {
-                lecturer: {
-                    user: {
-                        fullName: { contains: homeroomLecturerName.toLowerCase() }
+        const whereCondition = search ? {
+            OR: [
+                {
+                    name: {
+                        contains: search.toLowerCase()
+                    }
+                },
+                {
+                    homeroomLecturer: {
+                        user: {
+                            fullName: {
+                                contains: search.toLowerCase()
+                            }
+                        }
                     }
                 }
-            } : {}),
-        }
+            ]
+        } : {}
         const [classes, totalClasses] = await Promise.all([
             prisma.class.findMany({
                 where: whereCondition,
@@ -241,7 +244,7 @@ export const classService = {
         }
         const classes = await prisma.class.findMany({
             where: {
-                isActive : true,
+                isActive: true,
                 major: {
                     facultyId: Number(facultyId)
                 }
@@ -251,7 +254,7 @@ export const classService = {
             classes
         }
     },
-     getClassesByMajor: async (majorId) => {
+    getClassesByMajor: async (majorId) => {
         const major = await prisma.major.findUnique({
             where: { id: Number(majorId) },
 
@@ -261,7 +264,7 @@ export const classService = {
         }
         const classes = await prisma.class.findMany({
             where: {
-                isActive : true,
+                isActive: true,
                 majorId: Number(majorId)
             }
         })

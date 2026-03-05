@@ -102,13 +102,28 @@ export const buildingService = {
             updateBuildingStatus
         }
     },
-    getAllBuildings : async (buildingName,buildingLocation,page) => {
+    getAllBuildings : async (search,page) => {
         const limit = 10;
         const skip = (Number(page) -1) * limit;
-        const whereCondition = {
-            ...(buildingName ? {name : {contains : buildingName.toLowerCase()}} : {}),
-            ...(buildingLocation ? {location : {contains : buildingLocation.toLowerCase()}} : {})
-        }
+        const whereCondition = search ? {
+           OR : [
+             {
+                name : {
+                     contains: search.toLowerCase()
+                }
+             },
+             {
+                location: {
+                     contains: search.toLowerCase()
+                }
+             },
+             {
+                symbol : {
+                     contains: search.toLowerCase()
+                }
+             }
+           ]
+        } : {}
 
         const [buildings,totalBuildings] =await Promise.all([
             prisma.building.findMany({

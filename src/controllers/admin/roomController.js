@@ -36,10 +36,10 @@ export const roomController = {
     },
     getAllRooms: async (req, res, next) => {
         try {
-            const roomName = req.query.roomName || ""
+            const search = req.query.search || ""
             const buildingId = req.query.buildingId
             const page = req.query.page || 1
-            const data = await roomService.getAllRooms(roomName, buildingId, page)
+            const data = await roomService.getAllRooms(search, buildingId, page)
             const response = responseSuccess(data, "Lấy danh sách phòng có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {
@@ -50,10 +50,10 @@ export const roomController = {
     getAllRoomsSimple: async (req, res, next) => {
         try {
             const data = await roomService.getAllRoomsSimple()
-            const response = responseSuccess(data, "Lấy danh sách phòng thành công",err)
+            const response = responseSuccess(data, "Lấy danh sách phòng thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách phòng thất bại")
+            console.error("Lấy danh sách phòng thất bại",err)
             next(err)
         }
     },

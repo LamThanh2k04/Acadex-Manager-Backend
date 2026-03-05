@@ -36,9 +36,9 @@ export const programController = {
     },
     getAllPrograms: async (req, res, next) => {
         try {
-            const programName = req.query.programName
+            const search = req.query.search
             const page = req.query.page || 1
-            const data = await programService.getAllPrograms(programName, page)
+            const data = await programService.getAllPrograms(search, page)
             const response = responseSuccess(data, "Lấy danh sách chương trình có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

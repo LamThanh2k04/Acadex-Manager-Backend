@@ -37,9 +37,9 @@ export const subjectController = {
     },
     getAllSubjects: async (req, res, next) => {
         try {
-            const subjectName = req.query.subjectName || ""
+            const search = req.query.search || ""
             const page = req.query.page || 1
-            const data = await subjectService.getAllSubjects(subjectName, page)
+            const data = await subjectService.getAllSubjects(search, page)
             const response = responseSuccess(data, "Lấy danh sách môn học có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

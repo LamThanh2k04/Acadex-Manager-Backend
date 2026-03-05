@@ -36,9 +36,9 @@ export const classController = {
     },
     getAllClasses: async (req, res, next) => {
         try {
-            const { className, majorName, homeroomLecturerName } = req.query
+            const search = req.query.search
             const page = req.query.page || 1
-            const data = await classService.getAllClasses(className, majorName, homeroomLecturerName, page)
+            const data = await classService.getAllClasses(search, page)
             const response = responseSuccess(data, "Lấy danh sách lớp có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

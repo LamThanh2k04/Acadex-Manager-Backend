@@ -121,11 +121,11 @@ export const periodService = {
             updatePeriodStatus
         }
     },
-    getAllPeriods: async (period, page) => {
+    getAllPeriods: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            ...(period ? { period: Number(period) } : {})
+            ...(search ? { period: Number(search) } : {})
         }
         const [periods, totalPeriods] = await Promise.all([
             prisma.periodSetting.findMany({

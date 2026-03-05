@@ -104,7 +104,7 @@ export const subjectService = {
                 credits: credits,
                 theoryMinutes: theoryMinutes,
                 practiceMinutes: practiceMinutes,
-                countToGpa : countToGpa
+                countToGpa: countToGpa
             }
         })
         return {
@@ -128,11 +128,11 @@ export const subjectService = {
             updateSubjectStatus
         }
     },
-    getAllSubjects: async (subjectName, page) => {
+    getAllSubjects: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            ...(subjectName ? { name: { contains: subjectName.toLowerCase() } } : {})
+            ...(search ? { name: { contains: search.toLowerCase() } } : {})
         }
         const [subjects, totalSubjects, periodTime] = await Promise.all([
             prisma.subject.findMany({
@@ -177,6 +177,7 @@ export const subjectService = {
             select: {
                 id: true,
                 name: true,
+                isActive : true
             }
         })
         return {

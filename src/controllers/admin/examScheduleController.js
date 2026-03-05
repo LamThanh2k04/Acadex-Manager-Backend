@@ -69,9 +69,9 @@ export const examScheduleController = {
     },
     getAllExamSchedules: async (req, res, next) => {
         try {
-            const { courseSectionCode, roomName } = req.query
+            const search = req.query.search || ""
             const page = req.query.page || 1
-            const data = await examScheduleService.getAllExamSchedules(courseSectionCode, roomName, page)
+            const data = await examScheduleService.getAllExamSchedules(search, page)
             const response = responseSuccess(data, "Lấy tất cả lịch thi thành công")
             res.status(response.status).json(response)
         } catch (err) {

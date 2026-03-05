@@ -36,9 +36,9 @@ export const facultyController = {
     },
     getAllFaculties: async (req, res, next) => {
         try {
-            const facultyName = req.query.facultyName || "";
+            const search = req.query.search || "";
             const page = req.query.page || 1;
-            const data = await facultyService.getAllFaculties(facultyName, page);
+            const data = await facultyService.getAllFaculties(search, page);
             const response = responseSuccess(data, "Lấy danh sách khoa có phân trang thành công")
             res.status(response.status).json(response);
         } catch (err) {

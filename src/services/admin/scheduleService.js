@@ -211,28 +211,45 @@ export const scheduleService = {
             updateScheduleStatus
         }
     },
-    getAllSchedules: async (courseSectionCode, semesterId, type, dayOfweek, page) => {
+    getAllSchedules: async (search, semesterId, type, dayOfWeek, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            ...(courseSectionCode ? {
-                courseSection: {
-                    sectionCode: { contains: courseSectionCode.toLowerCase() }
-                }
+            ...(search ? {
+                OR: [
+                    {
+                        courseSection: {
+                            sectionCode: {
+                                contains: search.toLowerCase(),
+                            }
+                        }
+                    },
+                    {
+                        courseSection: {
+                            subject: {
+                                name: {
+                                    contains: search.toLowerCase(),
+                                }
+                            }
+                        }
+                    }
+                ]
             } : {}),
+
+            ...(type ? {
+                type: type
+            } : {}),
+
+            ...(dayOfWeek ? {
+                dayOfWeek: Number(dayOfWeek)
+            } : {}),
+
             ...(semesterId ? {
                 courseSection: {
-                    semesterId: { contains: Number(semesterId) }
+                    semesterId: Number(semesterId)
                 }
-            } : {}),
-            ...(type ? {
-                type: { contains: type.toLowerCase() }
-            } : {}),
-            ...(dayOfweek ? {
-                dayOfweek: { contains: Number(dayOfweek) }
-            } : {}),
+            } : {})
         }
-
         const [schedules, totalSchedules] = await Promise.all([
             prisma.schedule.findMany({
                 where: whereCondition,
@@ -252,16 +269,22 @@ export const scheduleService = {
                     meetingLink: true,
                     courseSection: {
                         select: {
-                            lecturer : {
+                            semester: {
                                 select : {
-                                    user : {
-                                        select : {
-                                            fullName : true
+                                    name : true,
+                                    academicYear : true
+                                }
+                            },
+                            sectionCode: true,
+                            lecturer: {
+                                select: {
+                                    user: {
+                                        select: {
+                                            fullName: true
                                         }
                                     }
                                 }
                             },
-                            sectionCode: true,
                             subject: {
                                 select: {
                                     name: true
@@ -275,7 +298,7 @@ export const scheduleService = {
                             building: {
                                 select: {
                                     name: true,
-                                    symbol : true
+                                    symbol: true
                                 }
                             }
                         }
@@ -296,5 +319,5 @@ export const scheduleService = {
             }
         }
     },
-    
+
 }

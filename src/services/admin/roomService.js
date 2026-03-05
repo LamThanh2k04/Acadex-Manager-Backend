@@ -92,11 +92,11 @@ export const roomService = {
             updateRoomStatus
         }
     },
-    getAllRooms: async (roomName, buildingId, page) => {
+    getAllRooms: async (search, buildingId, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit;
         const whereCondition = {
-            ...(roomName ? { name: { contains: roomName.toLowerCase() } } : {}),
+            ...(search ? { name: { contains: search.toLowerCase() } } : {}),
             ...(buildingId ? { buildingId: Number(buildingId) } : {})
         }
 
@@ -144,7 +144,6 @@ export const roomService = {
                 name: true,
                 building: {
                     select: {
-                        id: true,
                         name: true,
                         location: true,
                         symbol: true

@@ -96,14 +96,26 @@ export const majorService = {
             updateMajorStatus
         }
     },
-    getAllMajors: async (majorName, facultyId, page) => {
+    getAllMajors: async (search, page) => {
         const limit = 10;
         const skip = (Number(page) - 1) * limit;
-        const whereCondition = {
-            ...(majorName ? { name: { contains: majorName.toLowerCase() } } : {}),
-            ...(facultyId ? { facultyId: Number(facultyId) } : {})
+        const whereCondition = search ? {
+            OR: [
+                {
+                    name: {
+                        contains: search.toLowerCase()
+                    }
+                },
+                {
+                    faculty: {
+                        name: {
+                            contains: search.toLowerCase()
+                        }
+                    }
+                }
+            ]
 
-        }
+        } : {}
 
         const [majors, totalMajors] = await Promise.all([
             prisma.major.findMany({
@@ -111,16 +123,16 @@ export const majorService = {
                 take: limit,
                 skip: skip,
                 select: {
-                    id : true,
-                    code : true,
-                    name : true,
-                    isActive : true,
+                    id: true,
+                    code: true,
+                    name: true,
+                    isActive: true,
                     faculty: {
                         select: {
                             id: true,
                             name: true,
                             code: true,
-                            isActive : true
+                            isActive: true
                         }
                     }
                 },
@@ -143,13 +155,13 @@ export const majorService = {
     getAllMajorsSimple: async () => {
         const majors = await prisma.major.findMany({
             where: { isActive: true },
-            select : {
-                id : true,
-                name : true,
-                faculty : {
-                    select : {
-                        id : true,
-                        name : true
+            select: {
+                id: true,
+                name: true,
+                faculty: {
+                    select: {
+                        id: true,
+                        name: true
                     }
                 }
             },

@@ -80,11 +80,11 @@ export const certificateService = {
             updateCertificateStatus
         }
     },
-    getAllCertificates: async (certificateName, page) => {
+    getAllCertificates: async (search, page) => {
         const limit = 10;
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            ...(certificateName ? { name: { contains: certificateName.toLowerCase() } } : {})
+            ...(search ? { name: { contains: search.toLowerCase() } } : {})
         }
         const [certificates, totalCertificates] = await Promise.all([
             prisma.certificateTemplate.findMany({

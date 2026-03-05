@@ -118,13 +118,23 @@ export const semesterService = {
             updateSemesterStatus
         }
     },
-    getAllSemesters: async (semesterName, semesterYear, page) => {
+    getAllSemesters: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
-        const whereCondition = {
-            ...(semesterName ? { name: { contains: semesterName.toLowerCase() } } : {}),
-            ...(semesterYear ? { academicYear: { contains: semesterYear.toLowerCase() } } : {})
-        }
+        const whereCondition = search ? {
+            OR : [
+                {
+                    name: {
+                        contains: search.toLowerCase()
+                    }
+                },
+                {
+                    academicYear: {
+                        contains: search.toLowerCase()
+                    }
+                }
+            ]
+        } : {}
 
         const [semesters, totalSemesters] = await Promise.all([
             prisma.semester.findMany({
@@ -150,7 +160,7 @@ export const semesterService = {
     getAllSemestersSimple : async () => {
         const semesters = await prisma.semester.findMany({
             where : {isActive : true},
-            orderBy : {createdAt : 'desc'},
+            orderBy : {id : 'desc'},
             select : {
                 id : true,
                 name: true,

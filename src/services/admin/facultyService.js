@@ -82,10 +82,10 @@ export const facultyService = {
         }
 
     },
-    getAllFaculties: async (facultyName, page) => {
+    getAllFaculties: async (search, page) => {
         const limit = 10;
         const skip = (Number(page) - 1) * limit;
-        const whereCondition = { ...(facultyName ? { name: { contains: facultyName.toLowerCase() } } : {}) }
+        const whereCondition = { ...(search ? { name: { contains: search.toLowerCase() } } : {}) }
 
         const [faculties, totalFaculties] = await Promise.all([
             prisma.faculty.findMany({

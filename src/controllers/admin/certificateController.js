@@ -36,9 +36,9 @@ export const certificateController = {
     },
     getAllCertificates: async (req, res, next) => {
         try {
-            const certificateName = req.query.certificateName
+            const search = req.query.search
             const page = req.query.page || 1
-            const data = await certificateService.getAllCertificates(certificateName, page)
+            const data = await certificateService.getAllCertificates(search, page)
             const response = responseSuccess(data, "Lấy danh sách chứng chỉ có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {

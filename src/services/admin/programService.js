@@ -140,11 +140,11 @@ export const programService = {
             updateProgramStatus
         }
     },
-    getAllPrograms: async (programName, page) => {
+    getAllPrograms: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
-            ...(programName ? { name: { contains: programName.toLowerCase() } } : {})
+            ...(search ? { name: { contains: search.toLowerCase() } } : {})
         }
         const [programs, totalPrograms] = await Promise.all([
             prisma.program.findMany({
@@ -183,7 +183,14 @@ export const programService = {
                 version: true,
                 major: {
                     select: {
-                        name: true
+                        id : true,
+                        name: true,
+                        faculty : {
+                            select : {
+                                id : true,
+                                name : true
+                            }
+                        }
                     }
                 }
             }
@@ -198,11 +205,9 @@ export const programService = {
             include: {
                 major : {
                     select : {
-                        id : true,
                         name : true,
                         faculty : {
                            select : {
-                             id : true,
                             name : true
                            }
                         }

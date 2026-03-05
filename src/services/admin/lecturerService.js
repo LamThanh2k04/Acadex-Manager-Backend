@@ -240,43 +240,27 @@ export const lecturerService = {
             updateLecturerStatus
         }
     },
-    getAllLecturers: async (lecturerCode, lecturerName, majorName, facultyName, page) => {
+    getAllLecturers: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
             role: 'LECTURER',
-
-            ...(lecturerName ? {
-                fullName: {
-                    contains: lecturerName.toLowerCase(),
-                }
-            } : {}),
-
-            lecturer: {
-                ...(lecturerCode ? {
-                    lecturerCode: {
-                        contains: lecturerCode.toLowerCase(),
-                    }
-                } : {}),
-
-                ...(majorName ? {
-                    major: {
-                        name: {
-                            contains: majorName.toLowerCase(),
+            ...(search ? {
+                OR: [
+                    {
+                        fullName: {
+                            contains: search.toLowerCase()
                         }
-                    }
-                } : {}),
-
-                ...(facultyName ? {
-                    major: {
-                        faculty: {
-                            name: {
-                                contains: facultyName.toLowerCase(),
+                    },
+                    {
+                        lecturer: {
+                            lecturerCode: {
+                                contains: search.toLowerCase()
                             }
                         }
                     }
-                } : {})
-            }
+                ]
+            } : {})
         }
         const [lecturers, totalLecturers] = await prisma.$transaction([
             prisma.user.findMany({
@@ -676,7 +660,7 @@ export const lecturerService = {
     getInfoRequestChangeGradeLecturer: async (requestLecturerId) => {
         const requestInfoChangeGradeLecturer = await prisma.gradeChangeRequest.findUnique({
             where: { id: Number(requestLecturerId) },
-             select: {
+            select: {
                 id: true,
                 status: true,
                 note: true,
@@ -824,19 +808,19 @@ export const lecturerService = {
         })
     },
     getOverViewLecturer: async () => {
-        const [totalLecturer,male,female,accountLooked] = await Promise.all([
+        const [totalLecturer, male, female, accountLooked] = await Promise.all([
             prisma.user.count({
-                where : {role : 'LECTURER'}
+                where: { role: 'LECTURER' }
             }),
-             prisma.user.count({
-                where : {role : 'LECTURER', gender : 'MALE'},
+            prisma.user.count({
+                where: { role: 'LECTURER', gender: 'MALE' },
 
             }),
-             prisma.user.count({
-                where : {role : 'LECTURER', gender : 'FEMALE'}
+            prisma.user.count({
+                where: { role: 'LECTURER', gender: 'FEMALE' }
             }),
-             prisma.user.count({
-                where : {role : 'LECTURER', isActive : false}
+            prisma.user.count({
+                where: { role: 'LECTURER', isActive: false }
             }),
         ])
         return {
@@ -845,5 +829,39 @@ export const lecturerService = {
             female,
             accountLooked
         }
+    },
+    getAvailableHomeroomLecturers: async (majorId) => {
+
+        if (!Number.isInteger(Number(majorId))) {
+            throw new BadrequestException("MajorId không hợp lệ")
+        }
+
+        const major = await prisma.major.findUnique({
+            where: { id: Number(majorId) }
+        })
+
+        if (!major) {
+            throw new NotFoundException("Không tìm thấy ngành")
+        }
+
+        const lecturers = await prisma.lecturer.findMany({
+            where: {
+                facultyId: major.facultyId,
+                classes: {
+                    none: {}
+                }
+            },
+            select: {
+                id: true,
+                lecturerCode: true,
+                user: {
+                    select: {
+                        fullName: true
+                    }
+                }
+            }
+        })
+
+        return lecturers
     }
 }

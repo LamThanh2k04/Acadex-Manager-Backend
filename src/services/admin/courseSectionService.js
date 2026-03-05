@@ -134,29 +134,37 @@ export const courseSectionService = {
             updateCourseSectionStatus
         }
     },
-    getAllCourseSections: async (subjectName, className, lecturerName, page) => {
+    getAllCourseSections: async (search, page) => {
         const limit = 10
         const skip = (Number(page) - 1) * limit
 
-        const whereCondition = {
-            ...(subjectName ? {
-                subject: {
-                    name: { contains: subjectName.toLowerCase() }
-                }
-            } : {}),
-            ...(className ? {
-                plannedClass: {
-                    name: { contains: className.toLowerCase() }
-                }
-            } : {}),
-            ...(lecturerName ? {
-                lecturer: {
-                    user: {
-                        fullName: { contains: lecturerName.toLowerCase() }
+        const whereCondition = search ? {
+            OR: [
+                {
+                    subject: {
+                        name: {
+                            contains: search.toLowerCase()
+                        }
+                    }
+                },
+                {
+                    plannedClass: {
+                        name: {
+                            contains: search.toLowerCase()
+                        }
+                    }
+                },
+                {
+                    lecturer: {
+                        user: {
+                            fullName: {
+                                contains: search.toLowerCase()
+                            }
+                        }
                     }
                 }
-            } : {})
-        }
+            ]
+        } : {}
         const [courseSections, totalCourseSection] = await prisma.$transaction([
             prisma.courseSection.findMany({
                 where: whereCondition,

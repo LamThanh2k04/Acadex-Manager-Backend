@@ -38,9 +38,9 @@ export const lecturerController = {
     },
     getAllLecturers: async (req, res, next) => {
         try {
-            const { lecturerCode, lecturerName, majorName, facultyName } = req.query
+            const search = req.query.search
             const page = req.query.page || 1
-            const data = await lecturerService.getAllLecturers(lecturerCode, lecturerName, majorName, facultyName, page)
+            const data = await lecturerService.getAllLecturers(search, page)
             const response = responseSuccess(data, 'Lấy danh sách giảng viên có phân trang thành công')
             res.status(response.status).json(response)
         } catch (err) {
@@ -174,13 +174,24 @@ export const lecturerController = {
             next(err)
         }
     },
-    getOverViewLecturer : async (req,res,next) => {
+    getOverViewLecturer: async (req, res, next) => {
         try {
             const data = await lecturerService.getOverViewLecturer()
-            const response = responseSuccess(data,'Lấy tổng quan giảng viên thành công')
+            const response = responseSuccess(data, 'Lấy tổng quan giảng viên thành công')
             res.status(response.status).json(response)
         } catch (err) {
-            console.error('Lấy tổng quan giảng viên thất bại',err)
+            console.error('Lấy tổng quan giảng viên thất bại', err)
+            next(err)
+        }
+    },
+    getAvailableHomeroomLecturers: async (req, res, next) => {
+        try {
+            const majorId = req.params.majorId
+            const data = await lecturerService.getAvailableHomeroomLecturers(majorId)
+            const response = responseSuccess(data, 'Lấy giảng viên chưa có lớp chủ nhiệm thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy giảng viên chưa có lớp chủ nhiệm thất bại', err)
             next(err)
         }
     }

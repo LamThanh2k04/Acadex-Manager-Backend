@@ -38,9 +38,9 @@ export const studentController = {
     },
     getAllStudents: async (req, res, next) => {
         try {
-            const { studentCode, studentName, programName, majorName, facultyName, className } = req.query
+            const search = req.query.search || ""
             const page = req.query.page || 1
-            const data = await studentService.getAllStudents(studentCode, studentName, programName, majorName, facultyName, className, page)
+            const data = await studentService.getAllStudents(search, page)
             const response = responseSuccess(data, "Lấy danh sách sinh viên có phân trang thành công")
             res.status(response.status).json(response)
         } catch (err) {
