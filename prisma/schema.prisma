@@ -545,14 +545,17 @@ model Attendance {
 }
 
 model AttendanceSession {
-  id          Int       @id @default(autoincrement())
-  sessionDate DateTime
-  startedAt   DateTime
-  endedAt     DateTime?
-  note        String?
-  createdAt   DateTime  @default(now())
-  scheduleId  Int
-  lecturerId  Int
+  id            Int       @id @default(autoincrement())
+  sessionDate   DateTime
+  startedAt     DateTime
+  endedAt       DateTime?
+  note          String?
+  currentCode   String?
+  codeExpiresAt DateTime?
+  isTaking      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  scheduleId    Int
+  lecturerId    Int
 
   sentToAdmin Boolean  @default(false)
   schedule    Schedule @relation(fields: [scheduleId], references: [id])
