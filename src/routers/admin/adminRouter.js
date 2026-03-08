@@ -15,6 +15,7 @@ import scheduleRouter from '../admin/scheduleRouter.js'
 import studentRouter from '../admin/studentRouter.js'
 import examScheduleRouter from '../admin/examScheduleRouter.js'
 import dashboardRouter from '../admin/dashboardRouter.js'
+import notificationRouter from '../admin/notificationRouter.js'
 const router = express.Router();
 
 router.use('/faculty', facultyRouter);
@@ -33,4 +34,5 @@ router.use('/schedule',scheduleRouter)
 router.use('/student',studentRouter)
 router.use('/examSchedule',examScheduleRouter)
 router.use('/dashboard',dashboardRouter)
+router.use('/notification',notificationRouter)
 export default router;

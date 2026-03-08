@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from "cors"; 
 import { errorHandler } from './src/common/middlewares/errorHandler.js';
 import router from './src/routers/index.js';
+import { initSocket } from './src/socket/socket.js';
 
 dotenv.config();
 
@@ -22,7 +23,8 @@ app.get("/", (req, res) => {
 
 app.use(router);
 app.use(errorHandler)
-
+const server = http.createServer(app)
+initSocket(server)
 app.listen(PORT, () => {
   console.log(`Máy chủ đang chạy tại: http://localhost:${PORT}`);
 });

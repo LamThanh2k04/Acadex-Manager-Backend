@@ -1,0 +1,308 @@
+
+Login form chung đăng nhập cho 3 role
+POST : http://localhost:8000/api/auth/login
+
+Admin: 
+TK : admin1@admin.acadex
+MK : admin1
+
+Quản lý khoa:
+Tạo khoa (POST) : http://localhost:8000/api/admin/faculty/createFaculty (name string)
+
+Cập nhật thông tin khoa (PUT) : http://localhost:8000/api/admin/faculty/updateFacultyStatus/:facultyId (Cập nhật name)
+
+Cập nhật trạng thái khoa nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/faculty/updateFacultyStatus/:facultyId
+
+Lấy danh sách khoa có phân trang và tìm kiếm theo tên khoa (Get) : http://localhost:8000/api/admin/faculty/getAllFaculties
+    * (tìm kiếm theo tên và phân trang là http://localhost:8000/api/admin/faculty/getAllFaculties?search=Xã Hội và Nhân Văn&page=1 )
+
+
+Quản lý ngành:
+Tạo ngành (POST) : http://localhost:8000/api/admin/major/createMajor (name,facultyId) 
+    * cái facultyId thì dùng api này lấy ra : http://localhost:8000/api/admin/faculty/getAllFacultiesSimple
+
+Cập nhật thông tin ngành (PUT) : http://localhost:8000/api/admin/major/updateMajorInfo/:majorId (Cập nhật name string, facultyId int)
+    * cái facultyId thì dùng api này lấy ra : http://localhost:8000/api/admin/faculty/getAllFacultiesSimple
+
+Cập nhật trạng thái ngành nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/major/updateMajorStatus/:majorId
+
+Lấy danh sách ngành có phân trang và tìm kiếm theo tên ngành hoặc tên khoa (GET) : http://localhost:8000/api/admin/major/getAllMajors?majorName=Toán Ứng Dụng
+    * (tìm kiếm và phân trang là http://localhost:8000/api/admin/major/getAllMajors?search=Kỹ Thuật Phầm Mềm)
+
+Quản lý cơ sở:
+Tạo cơ sở (POST) : http://localhost:8000/api/admin/building/createBuilding (code string ,name string ,symbol string,location string)
+
+Cập nhật thông tin cơ sở (PUT) : http://localhost:8000/api/admin/building/updateBuildingInfo/:buildingId (Cập nhật name,symbol,location)
+
+Cập nhật trạng thái cơ sở nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/building/updateBuildingStatus/:buildingId
+
+Lấy danh sách cơ sở có phân trang và tìm kiếm theo tên cơ sở và địa chỉ và kí hiệu cơ sở đó (Get) : http://localhost:8000/api/admin/building/getAllBuildings
+    * (tìm kiếm và phân trang là:  http://localhost:8000/api/admin/building/getAllBuildings?search=Cơ sở 1)
+
+Quản lý phòng học: 
+Tạo phòng học (POST): http://localhost:8000/api/admin/room/createRoom (name string,buildingId int)
+    * Lấy danh sách cơ sở (GET) : http://localhost:8000/api/admin/building/getAllBuildingsSimple
+
+Cập nhật phòng (PÚT): http://localhost:8000/api/admin/room/updateRoomInfo/:roomId (name string, buildingId int)
+
+Cập nhật trạng thái phòng nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/room/updateRoomStatus/:roomId
+
+Lấy danh sách phòng có phân trang (có thể lọc tên phòng và select id cơ sở) (GET): http://localhost:8000/api/admin/room/getAllRooms (buildingId=1, search=fefef) 
+    * Lấy danh sách cơ sở (GET) : http://localhost:8000/api/admin/building/getAllBuildingsSimple
+
+Quản lý môn học:
+Tạo môn học (POST): http://localhost:8000/api/admin/subject/createSubject (name string, credits,theoryPeriods tiết lý thuyết,practicePeriods tiết thực hành int, countToGpa boolean)
+
+Cập nhật môn học (PUT): http://localhost:8000/api/admin/subject/updateSubjectStatus/:subjectId (name string, credits,theoryPeriods,practicePeriods int, countToGpa boolean)
+
+Cập nhật trạng thái môn nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/subject/updateSubjectStatus/:subjectId
+
+Lấy danh sách môn có phân trang và lọc tên môn học (GET) : http://localhost:8000/api/admin/subject/getAllSubjects?search=Toán cao cấp A2
+
+Quản lý học kì: 
+Tạo học kì (POST) : http://localhost:8000/api/admin/semester/createSemester (name,academicYear string, startDate, endDate Date)
+
+Cập nhật học kì (PUT) : http://localhost:8000/api/admin/semester/updateSemesterInfo/:semesterId (name,academicYear string, startDate, endDate Date)
+
+Cập nhật trạng thái học kì nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/semester/updateSemesterStatus/:semesterId
+
+Lấy danh sách học kì có phân trang và lọc theo tên học kì hoặc năm niên khóa (GET): http://localhost:8000/api/admin/semester/getAllSemesters?search=2025
+
+Quản lý tiết học: 
+
+Tạo tiết học (POST) : http://localhost:8000/api/admin/period/createPeriod (period, startTime, endTime int) lưu db ở dạng phút
+
+Cập nhật tiết học (PUT) : http://localhost:8000/api/admin/period/updatePeriodInfo/:periodId (period, startTime, endTime int)
+
+Cập nhật trạng thái tiết học nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/period/updatePeriodStatus/:periodId
+
+Lấy  danh sách tiết học có phân trang và lọc theo tiết (GET) : http://localhost:8000/api/admin/period/getAllPeriods?search=1
+
+Quản lý chứng chỉ: 
+Tạo chứng chỉ (POST) : http://localhost:8000/api/admin/certificate/createCertificate (name, description string)
+
+Cập nhật chứng chỉ (PUT) : http://localhost:8000/api/admin/certificate/updateCertificateInfo/:certificateId (name, description string)
+
+Cập nhật trạng thái chứng chỉ nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/certificate/updateCertificateStatus/:certificateId
+
+Lấy danh sách chứng chỉ có phân trang và lọc theo tên : http://localhost:8000/api/admin/certificate/getAllCertificates?search=Giáo dục quốc phòng
+
+Quản lý chương trình:
+
+Tạo chương trình (POST) : http://localhost:8000/api/admin/program/createProgram 
+    * name string
+    * trainingLevel theo enum COLLEGE, BACHELOR, MASTER
+    * educationType theo enum FULL_TIME, PART_TIME, DISTANCE_LEARNING
+    * plannedEducationYear float
+    * feePerCredit, version, majorId int
+    * Lấy danh sách ngành: http://localhost:8000/api/admin/major/getAllMajorsSimple
+
+Cập nhật chương trình (PUT) : http://localhost:8000/api/admin/program/updateProgramInfo/:programId
+    * name string
+    * trainingLevel theo enum COLLEGE, BACHELOR, MASTER
+    * educationType theo enum FULL_TIME, PART_TIME, DISTANCE_LEARNING
+    * plannedEducationYear float
+    * feePerCredit, version, majorId int
+    * Lấy danh sách ngành: http://localhost:8000/api/admin/major/getAllMajorsSimple
+
+Cập nhật trạng thái chương trình nút toggle bật tắt trạng thái (PUT) : http://localhost:8000/api/admin/program/updateProgramStatus/:programId
+
+Lấy danh sách chương trình có phân trang và lọc theo tên chương trình (GET) : http://localhost:8000/api/admin/program/getAllPrograms?search=Công Nghệ Thông Tin
+
+Lấy thông tin chi tiết 1 program (GET) : http://localhost:8000/api/admin/program/getProgramInfo/:programId
+
+Thêm môn vào chương trình (POST) : http://localhost:8000/api/admin/program/addSubjectToProgram/:programId
+    * subjectIds : truyền nhiều môn hoặc 1 môn theo id môn []
+    * semesterOrder : int 
+    * type theo enum MANDATORY, ELECTIVE
+    * feePerCredit nếu những môn đó có tiền 1 tín chỉ ít hơn (tự chọn)
+    * Lấy danh sách môn: http://localhost:8000/api/admin/subject/getAllSubjectsSimple
+
+Cập nhật các field mà môn đó add vô chương trình (PUT) : http://localhost:8000/api/admin/program/updateSubjectToProgram/:programId
+    * semesterOrder : int 
+    * type theo enum MANDATORY, ELECTIVE
+    * feePerCredit nếu những môn đó có tiền 1 tín chỉ ít hơn (tự chọn)
+    * isActive boolean
+
+Thêm chứng chỉ vào chương trình (POST) : http://localhost:8000/api/admin/program/addCertificateToProgram/:programId
+    * certificateIds: truyền nhiều chứng chỉ hoặc 1 chứng chỉ []
+    * Lấy danh sách chứng chỉ: http://localhost:8000/api/admin/certificate/getAllCertificatesSimples
+
+
+Cập nhật trạng thái chứng chỉ vào chương trình nút toggle: http://localhost:8000/api/admin/program/updateCertificateToProgram/:programCertificateId
+    * isActive boolean
+
+Lấy danh sách chương trình : http://localhost:8000/api/admin/program/getAllProgramsSimple
+Lấy các kì trong chương trình đó : http://localhost:8000/api/admin/program/getSemesterOrdersPrgram/:programId
+Lấy các môn trong kì của chương trình đó: http://localhost:8000/api/admin/program/getSubjectsBySemesterOrder/:programId/semesterOrder/:semesterOrderId
+
+Quản lý giảng viên:
+Tạo giảng viên: http://localhost:8000/api/admin/lecturer/createLecturer
+    * fullName, email, password, lecturerCode string
+    * avatar có thì add vô, (avatar)
+    * gender theo enum MALE FEMALE
+    * majorId int
+    * Lấy danh sách ngành: http://localhost:8000/api/admin/major/getAllMajorsSimple
+
+Cập nhật giảng viên: http://localhost:8000/api/admin/lecturer/updateLecturerInfo/:lecturerId
+    * fullName, email,lecturerCode, personalEmail, placeOfBirth, ethnicity, address, phoneNumber,citizenId string
+    * majorId int 
+    * dateOfBirth date
+    * Lấy danh sách ngành: http://localhost:8000/api/admin/major/getAllMajorsSimple
+    * gender theo enum MALE FEMALE
+    * degree theo enum   BACHELOR,MASTER,DOCTOR,ASSOCIATE_PROFESSOR,PROFESSOR
+    * position theo enum LECTURER,HEAD_SUBJECT,HEAD_DEPARTMENT
+    * status theo enum WORKING, TRUANT
+    * avatar 
+
+Cập nhật trạng thái tài khoản giáo viên nút toggle : http://localhost:8000/api/admin/lecturer/updateLecturerStatusActive/:lecturerId
+
+Đặt lại mk giảng viên đó (PUT): http://localhost:8000/api/admin/lecturer/resetPasswordLecturer/:lecturerId 
+    * newPassword string
+
+Lấy danh sách giảng viên có phân trang và lọc theo tên hoặc mssgv : http://localhost:8000/api/admin/lecturer/getAllLecturers?search=Ngô Thanh Nghị
+
+Lấy overViewLecturer : http://localhost:8000/api/admin/lecturer/getOverViewLecturer
+    * Lấy tổng giảng viên, tổng nam, nữ, số tài khoản khóa
+
+Quản lý sinh viên"
+
+Tạo sinh viên: http://localhost:8000/api/admin/student/createStudent
+    * fullName, email, password, studentCode, string
+    * gender theo enum MALE FEMALE
+    * avatar thêm ảnh đc còn hk thì để null
+    * classId int Lấy danh sách lớp: http://localhost:8000/api/admin/class/getAllClassesSimple
+    * programId int Lấy danh sách chương trình: http://localhost:8000/api/admin/program/getAllProgramsSimple
+
+Cập nhật thông tin sinh viên: http://localhost:8000/api/admin/student/updateStudentInfo/:studentId
+    * fullName, email, phoneNumber, address, studentCode, personalEmail, citizenId, placeOfBirth, ethnicity
+    * gender theo enum gender theo enum MALE FEMALE
+    * dateOfBirth date
+    * admissionYear, graduateYear, classId int 
+    * Lấy danh sách lớp: http://localhost:8000/api/admin/class/getAllClassesSimple
+    *status theo enum   STUDYING,GRADUATE,TRUANT
+
+Cập nhật trạng thái tài khoản sinh viên nút toggle: http://localhost:8000/api/admin/student/updateStudentStatusActive/:studentId
+
+Lấy danh sách sinh viên có phân trang và lọc theo tên hoặc mssv: http://localhost:8000/api/admin/student/getAllStudents?search=Ngô
+
+Đặt lại mk cho sinh viên đó: http://localhost:8000/api/admin/student/resetPasswordStudent/:studentId
+    * newPassword string
+
+Lấy overViewStudent : http://localhost:8000/api/admin/student/getOverViewStudent
+    * Lấy tổng sinh viên, tổng nam, nữ, số tài khoản khóa
+
+Quản lý yêu cầu:
+
+Lấy danh sách yêu cầu nộp chứng chỉ có phân trang và lọc theo trạng thái (PENDING,ISSUED,REVOKED): http://localhost:8000/api/admin/student/getAllRequestCertificatesStudents
+
+Lấy thông tin chi tiết yêu cầu: http://localhost:8000/api/admin/student/getInfoRequestCertificateStudent/:certificateId
+
+Chấp nhận yêu cầu (POST): http://localhost:8000/api/admin/student/approveRequestCertificate/:certificateId
+    * có thể ghi note hoặc null
+
+từ chối yêu cầu (POST): http://localhost:8000/api/admin/student/rejectRequestCertificate/:certificateId
+    *  có thể ghi note hoặc null
+
+Quản lý phần theo dõi học phần học sinh đóng đã hay thiếu :
+    * (GET): http://localhost:8000/api/admin/student/getStudentsTuitionStatus
+
+Quản lý lớp: 
+
+Tạo lớp (POST) : http://localhost:8000/api/admin/class/createClass 
+    * name string
+    * majorId int Lấy danh sách ngành: http://localhost:8000/api/admin/major/getAllMajorsSimple
+    * homeroomLecturerId : có thể dán giảng viên luôn hoặc hk cũng đc null
+    * api lấy danh sách giảng viên theo ngành mà chưa có lớp chủ nhiệm: http://localhost:8000/api/admin/lecturer/getAvailableHomeroomLecturers/:majorId
+
+Cập nhật lớp :  http://localhost:8000/api/admin/class/updateClassInfo/:classId
+    * name string
+    * majorId int
+    *Lấy danh sách ngành: http://localhost:8000/api/admin/major/getAllMajorsSimple
+    * cập nhật lại giảng viên hoặc set null lại (homeroomLecturerId)
+    * api lấy danh sách giảng viên theo ngành mà chưa có lớp chủ nhiệm: http://localhost:8000/api/admin/lecturer/getAvailableHomeroomLecturers/:majorId
+
+cập nhật trạng thái lớp học nút toggle : http://localhost:8000/api/admin/class/updateClassStatus/:classId
+
+Lấy danh sách lớp có phân trang và lọc theo tên lớp hoặc giảng viên: http://localhost:8000/api/admin/class/getAllClasses?search=Lê Mậu Long
+
+Quản lý học phần: 
+
+Tạo học phần: http://localhost:8000/api/admin/courseSection/createCourseSection 
+Lấy danh sách chương trình : http://localhost:8000/api/admin/program/getAllProgramsSimple 
+Lấy các kì trong chương trình đó : http://localhost:8000/api/admin/program/getSemesterOrdersPrgram/:programId
+Lấy các môn trong kì của chương trình đó: http://localhost:8000/api/admin/program/getSubjectsBySemesterOrder/:programId/semesterOrder/:semesterOrderId
+   
+    * maxStudents, 
+    * subjectId, 
+    * lecturerId Lấy giảng viên http://localhost:8000/api/admin/lecturer/getAllLecturersSimple
+    * semesterId Danh sách kì thực tế: http://localhost:8000/api/admin/semester/getAllSemestersSimple
+    * plannedClassId Danh sách lớp : http://localhost:8000/api/admin/class/getAllClassesSimple
+    
+Cập nhật học phần: http://localhost:8000/api/admin/courseSection/updateCourseSectionInfo/:courseSectionId
+    * maxStudents, 
+    * subjectId, 
+    * lecturerId Lấy giảng viên http://localhost:8000/api/admin/lecturer/getAllLecturersSimple
+
+Cập nhật trạng thái học phần nút toggle : http://localhost:8000/api/admin/courseSection/updateCourseSectionStatus/:courseSectionId
+
+Lấy danh sách học phần có phân trang và lọc theo tên môn học, lớp, tên giản viên: http://localhost:8000/api/admin/courseSection/getAllCourseSections?search=Giáo dục quốc phòng và an ninh
+
+Quản lý Lịch:
+
+    * Lấy danh sách học kì: http://localhost:8000/api/admin/semester/getAllSemestersSimple
+    * Lấy danh sách học phần theo học kì: http://localhost:8000/api/admin/courseSection/getCourseSectionBySemester/:semesterId
+    * Lấy danh sách phòng : http://localhost:8000/api/admin/room/getAllRoomsSimple
+    * Lấy danh sách tiết học: http://localhost:8000/api/admin/period/getAllPeriodsSimple
+Tạo lịch (POST) : http://localhost:8000/api/admin/schedule/createSchedule
+    * courseSectionId, dayOfWeek, startTimeMinutes, endTimeMinutes, roomId int
+    * startDate, endDate date
+    * type theo enum  THEORY, PRACTICE, ONLINE
+
+    nếu type là thực hành thì thêm field: practiceGroup, maxStudents int  còn type lý thuyết như trên còn type online thì thêm field meetingLink string nếu có link
+
+Cập nhật Lịch (PUT) : http://localhost:8000/api/admin/schedule/updateScheduleInfo/:scheduleId
+    * dayOfWeek, startTimeMinutes, endTimeMinutes, roomId, startDate, endDate này lý thuyết
+    *  nếu type là thực hành thì field: practiceGroup, maxStudents int, type online thì  field meetingLink string nếu có link
+
+Cập nhật trạng thái lịch nút toggle : http://localhost:8000/api/admin/schedule/updateScheduleStatus/:scheduleId
+
+Lấy danh sách lịch có phân trang và lọc theo mã học phần hoặc tên môn, type,semesterId,dayOfweek (2->8) sẽ là select : http://localhost:8000/api/admin/schedule/getAllSchedules?search=954732155967
+   * Lấy danh sách học kì: http://localhost:8000/api/admin/semester/getAllSemestersSimple
+
+Quản lý lịch thi:
+
+Gợi ý ngày thi của học phần đó để tạo lịch thi
+    * http://localhost:8000/api/admin/examSchedule/suggestExamSchedule/:courseSectionId
+Tạo lịch thi (POST): http://localhost:8000/api/admin/examSchedule/createExamSchedule
+    * Lấy học kì thực tế : http://localhost:8000/api/admin/semester/getAllSemestersSimple
+    * courseSectionId int, Lấy học phần mà chưa có lịch thi ở kì đó: http://localhost:8000/api/admin/examSchedule/getCourseSectionHaveSchedule/:semesterId
+    * examDate date
+    * startMinute, endMinute lưu dưới dạng phút
+    * khi người dùng bấm form điền đủ 3 thông tin trên gọi api này để lấy phòng trống
+    roomId Lấy danh sách phòng thi còn trống: http://localhost:8000/api/admin/examSchedule/getAvailableRooms?date=&startTime=&endTime=
+    * note có thể ghi vô hoặc để null
+Cập nhật lịch thi: http://localhost:8000/api/admin/examSchedule/updateExamScheduleInfo/:examScheduleId
+    * examDate date
+    * startMinute, endMinute lưu dưới dạng phút
+    * khi người dùng bấm form điền đủ 3 thông tin trên gọi api này để lấy phòng trống
+    roomId Lấy danh sách phòng thi còn trống: http://localhost:8000/api/admin/examSchedule/getAvailableRooms?date=&startTime=&endTime=
+    * note có thể ghi vô hoặc để null 
+    
+Cập nhật trạng thái lịch thi toggle: http://localhost:8000/api/admin/examSchedule/updateExamScheduleStatus/:examScheduleId
+
+Lấy danh sách lịch thi có phân trạng và lọc theo mã học phần, tên môn, phòng: http://localhost:8000/api/admin/examSchedule/getAllExamSchedules?search=201236502974
+
+dashboard: 
+ overView : http://localhost:8000/api/admin/dashboard/getOverView
+    * Lấy tổng doanh thu, tổng sinh viên/giảng viên, tổng học phần
+
+Lấy số nam/nữ có lọc theo role LECTURER, STUDENT : http://localhost:8000/api/admin/dashboard/getGenders?role=LECTURER
+
+Biểu đồ đường tổng doanh thu 1 năm đó : http://localhost:8000/api/admin/dashboard/getLineChartRevenueLineChart?year=2025 truyền năm 
+
+Lấy top sinh viên gpa cao: http://localhost:8000/api/admin/dashboard/getTopStudentGpa
+
+Lấy tỉ lệ đậu/rớt: http://localhost:8000/api/admin/dashboard/getPassFailStatus có lọc theo id môn 
+    * Lấy danh sách môn học: http://localhost:8000/api/admin/subject/getAllSubjectsSimple
+    * http://localhost:8000/api/admin/dashboard/getPassFailStatus?subjectId=1
