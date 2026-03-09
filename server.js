@@ -4,7 +4,7 @@ import cors from "cors";
 import { errorHandler } from './src/common/middlewares/errorHandler.js';
 import router from './src/routers/index.js';
 import { initSocket } from './src/socket/socket.js';
-
+import http from 'http';
 dotenv.config();
 
 const app = express();

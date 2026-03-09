@@ -8,6 +8,7 @@ import certificateRouter from '../student/certificateRouter.js'
 import gradesResultsRouter from '../student/gradesResultsRouter.js'
 import aiRouter from '../student/aiRouter.js'
 import resetRouter from '../student/resetRouter.js'
+import notificationRouter from '../student/notificationRouter.js'
 const router = express.Router()
 
 router.use('/profileStudent',profileStudentRouter)
@@ -19,4 +20,5 @@ router.use('/certificate',certificateRouter)
 router.use('/grades',gradesResultsRouter)
 router.use('/ai',aiRouter)
 router.use('/reset',resetRouter)
+router.use('/notification',notificationRouter)
 export default router

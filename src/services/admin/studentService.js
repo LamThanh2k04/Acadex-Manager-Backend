@@ -240,7 +240,7 @@ export const studentService = {
         const skip = (Number(page) - 1) * limit
         const whereCondition = {
             role: 'STUDENT',
-           ...(search ? {
+            ...(search ? {
                 OR: [
                     {
                         fullName: {
@@ -333,7 +333,7 @@ export const studentService = {
         }
     },
     resetPasswordStudent: async (studentId, data) => {
-        const {newPassword} = data
+        const { newPassword } = data
         const student = await prisma.student.findUnique({
             where: { id: Number(studentId) },
             include: {
@@ -386,7 +386,7 @@ export const studentService = {
                     },
                     template: {
                         select: {
-                            code : true,
+                            code: true,
                             name: true,
                         }
                     }
@@ -490,12 +490,7 @@ export const studentService = {
             where: {
                 enrollments: {
                     some: {
-                        status: 'REGISTERED',
-                        ...(semesterId && {
-                            courseSection: {
-                                semesterId: Number(semesterId)
-                            }
-                        })
+                        status: 'REGISTERED'
                     }
                 }
             },
@@ -506,29 +501,17 @@ export const studentService = {
                 },
                 enrollments: {
                     where: {
-                        status: 'REGISTERED',
-                        ...(semesterId && {
-                            courseSection: {
-                                semesterId: Number(semesterId)
-                            }
-                        })
+                        status: 'REGISTERED'
                     },
                     select: {
                         fee: true,
                         courseSection: {
                             select: {
-                                sectionCode: true,
                                 semester: {
                                     select: {
+                                        id: true,
                                         name: true,
                                         academicYear: true
-                                    }
-                                },
-                                subject: {
-                                    select: {
-                                        code: true,
-                                        name: true,
-                                        credits: true
                                     }
                                 }
                             }
@@ -549,52 +532,65 @@ export const studentService = {
             }
         })
 
-        const calculated = students.map(student => {
+        const results = []
 
-            // 1️⃣ Tổng tiền học phần
-            const totalCourseFee = student.enrollments.reduce(
-                (sum, e) => sum + e.fee,
-                0
-            )
+        students.forEach(student => {
 
-            // 2️⃣ Lấy danh sách payment unique
-            const paymentMap = new Map()
+            const semesterMap = {}
 
             student.enrollments.forEach(enrollment => {
+
+                const semester = enrollment.courseSection.semester
+                const key = semester.id
+
+                if (!semesterMap[key]) {
+                    semesterMap[key] = {
+                        semesterName: `${semester.name} ${semester.academicYear}`,
+                        totalCourseFee: 0,
+                        paymentMap: new Map()
+                    }
+                }
+
+                semesterMap[key].totalCourseFee += enrollment.fee
+
                 enrollment.payments.forEach(pe => {
                     const payment = pe.payment
                     if (payment && payment.status === "SUCCESS") {
-                        paymentMap.set(payment.id, payment.amount)
+                        semesterMap[key].paymentMap.set(payment.id, payment.amount)
                     }
                 })
             })
 
-            // 3️⃣ Tổng tiền đã đóng (không bị lặp)
-            const paidAmount = Array.from(paymentMap.values())
-                .reduce((sum, amount) => sum + amount, 0)
+            Object.values(semesterMap).forEach(sem => {
 
-            const remainingAmount = totalCourseFee - paidAmount
+                const paidAmount = Array.from(sem.paymentMap.values())
+                    .reduce((sum, amount) => sum + amount, 0)
 
-            let statusResult = "PAID"
+                const remainingAmount = sem.totalCourseFee - paidAmount
 
-            if (totalCourseFee === 0) {
-                statusResult = "NO_COURSE"
-            } else if (remainingAmount > 0) {
-                statusResult = "UNPAID"
-            }
-            return {
-                studentCode: student.studentCode,
-                fullName: student.user.fullName,
-                totalCourseFee,
-                paidAmount,
-                remainingAmount,
-                status: statusResult
-            }
+                let statusResult = "PAID"
+
+                if (sem.totalCourseFee === 0) {
+                    statusResult = "NO_COURSE"
+                } else if (remainingAmount > 0) {
+                    statusResult = "UNPAID"
+                }
+
+                results.push({
+                    studentCode: student.studentCode,
+                    fullName: student.user.fullName,
+                    semester: sem.semesterName,
+                    totalCourseFee: sem.totalCourseFee,
+                    paidAmount,
+                    remainingAmount,
+                    status: statusResult
+                })
+            })
         })
 
         const filtered = status
-            ? calculated.filter(s => s.status === status)
-            : calculated
+            ? results.filter(s => s.status === status)
+            : results
 
         const total = filtered.length
         const studentsPaginated = filtered.slice(skip, skip + limit)
@@ -609,20 +605,20 @@ export const studentService = {
             }
         }
     },
-     getOverViewStudent: async () => {
-        const [totalStudent,male,female,accountLooked] = await Promise.all([
+    getOverViewStudent: async () => {
+        const [totalStudent, male, female, accountLooked] = await Promise.all([
             prisma.user.count({
-                where : {role : 'STUDENT'}
+                where: { role: 'STUDENT' }
             }),
-             prisma.user.count({
-                where : {role : 'STUDENT', gender : 'MALE'},
+            prisma.user.count({
+                where: { role: 'STUDENT', gender: 'MALE' },
 
             }),
-             prisma.user.count({
-                where : {role : 'STUDENT', gender : 'FEMALE'}
+            prisma.user.count({
+                where: { role: 'STUDENT', gender: 'FEMALE' }
             }),
-             prisma.user.count({
-                where : {role : 'STUDENT', isActive : false}
+            prisma.user.count({
+                where: { role: 'STUDENT', isActive: false }
             }),
         ])
         return {

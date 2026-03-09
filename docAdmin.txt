@@ -204,8 +204,9 @@ Chấp nhận yêu cầu (POST): http://localhost:8000/api/admin/student/approve
 từ chối yêu cầu (POST): http://localhost:8000/api/admin/student/rejectRequestCertificate/:certificateId
     *  có thể ghi note hoặc null
 
-Quản lý phần theo dõi học phần học sinh đóng đã hay thiếu :
-    * (GET): http://localhost:8000/api/admin/student/getStudentsTuitionStatus
+Quản lý phần theo dõi học phần học sinh đóng đã hay thiếu theo kì đó có lọc trạng thái (UNPAID,PAID) và học kì thực tế  :
+    * Lấy học kì thực tế http://localhost:8000/api/admin/semester/getAllSemestersSimple
+    * (GET): http://localhost:8000/api/admin/student/getStudentsTuitionStatus?status ?semesterId
 
 Quản lý lớp: 
 
@@ -306,3 +307,16 @@ Lấy top sinh viên gpa cao: http://localhost:8000/api/admin/dashboard/getTopSt
 Lấy tỉ lệ đậu/rớt: http://localhost:8000/api/admin/dashboard/getPassFailStatus có lọc theo id môn 
     * Lấy danh sách môn học: http://localhost:8000/api/admin/subject/getAllSubjectsSimple
     * http://localhost:8000/api/admin/dashboard/getPassFailStatus?subjectId=1
+
+Quản lý thông báo:
+Tạo thông báo: http://localhost:8000/api/admin/notification/sendNotification
+    * title, message string
+    * nếu muốn gửi chỉ định cho 1 hoặc cho nhiều học sinh (userIds gửi đc 1 hoặc nhiều : []), Api search tên học sinh để lấy: http://localhost:8000/api/admin/notification/getStudentsBySearch?search=2200010762    
+    * còn muốn gửi tất cả thì khỏi truyền userIds chỉ cần 2 cái trên là đc
+
+Cập nhật thông báo: http://localhost:8000/api/admin/notification/updateNotification/:notificationId title, message string
+
+Lấy danh sách thông báo có phân trang và tìm kiếm theo tiêu đề: http://localhost:8000/api/admin/notification/getAllNotifications?search=Thông báo 1 sinh viên
+
+Xóa thông báo: http://localhost:8000/api/admin/notification/removeNotification/:notificationId
+
