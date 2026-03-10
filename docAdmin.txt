@@ -1,6 +1,6 @@
 
 Login form chung đăng nhập cho 3 role
-POST : http://localhost:8000/api/auth/login
+POST : http://localhost:8000/api/auth/login identifier, password
 
 Admin: 
 TK : admin1@admin.acadex
