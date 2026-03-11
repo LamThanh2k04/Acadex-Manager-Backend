@@ -7,118 +7,177 @@ export const classService = {
         validateMissingFields(data, ['name', 'majorId'])
         const { name, majorId, homeroomLecturerId } = data
 
+    
         if (typeof name !== 'string' || name.trim() === '') {
             throw new BadrequestException("Tên lớp không hợp lệ")
         }
-        if (!Number.isInteger(Number(majorId))) {
+
+   
+        const mid = Number(majorId)
+        if (!Number.isInteger(mid)) {
             throw new BadrequestException('MajorId không hợp lệ')
         }
-        if (homeroomLecturerId !== null && homeroomLecturerId !== undefined) {
 
-            if (!Number.isInteger(Number(homeroomLecturerId))) {
-                throw new BadrequestException("Giảng viên không hợp lệ")
-            }
-
-            const lecturer = await prisma.lecturer.findUnique({
-                where: { id: Number(homeroomLecturerId) }
-            })
-
-            if (!lecturer) {
-                throw new NotFoundException("Không tìm thấy giảng viên")
-            }
-            const major = await prisma.major.findUnique({
-                where: { id: Number(majorId) }
-            })
-
-            if (!major) {
-                throw new NotFoundException("Không tìm thấy ngành")
-            }
-
-            if (lecturer.facultyId && lecturer.facultyId !== major.facultyId) {
-                throw new BadrequestException(
-                    "Giảng viên không thuộc khoa này"
-                )
-            }
-        }
-        const existingClassName = await prisma.class.findFirst({
-            where: { name: name.trim(), majorId: Number(majorId) }
-        })
-        if (existingClassName) {
-            throw new ConflictException("Đã tồn tại lớp học ở ngành này")
-        }
-        const createClass = await prisma.class.create({
-            data: {
-                name: name.trim(),
-                majorId: Number(majorId),
-                homeroomLecturerId: homeroomLecturerId ? Number(homeroomLecturerId) : null
-            }
-        })
-        return {
-            createClass
-        }
-    },
-    updateClassInfo: async (classId, data) => {
-        validateMissingFields(data, ['name', 'majorId'])
-        const { name, majorId, homeroomLecturerId } = data
-
-        if (typeof name !== 'string' || name.trim() === '') {
-            throw new BadrequestException("Tên lớp không hợp lệ")
-        }
-        if (!Number.isInteger(Number(majorId))) {
-            throw new BadrequestException('MajorId không hợp lệ')
-        }
         const major = await prisma.major.findUnique({
-            where: { id: Number(majorId) }
+            where: { id: mid }
         })
+
         if (!major) {
             throw new NotFoundException("Không tìm thấy ngành")
         }
+
+    
+        let lecturerId = null
+
         if (homeroomLecturerId !== null && homeroomLecturerId !== undefined) {
 
-            if (!Number.isInteger(Number(homeroomLecturerId))) {
+            lecturerId = Number(homeroomLecturerId)
+
+            if (!Number.isInteger(lecturerId)) {
                 throw new BadrequestException("Giảng viên không hợp lệ")
             }
 
             const lecturer = await prisma.lecturer.findUnique({
-                where: { id: Number(homeroomLecturerId) }
+                where: { id: lecturerId }
             })
 
             if (!lecturer) {
                 throw new NotFoundException("Không tìm thấy giảng viên")
             }
 
-            const major = await prisma.major.findUnique({
-                where: { id: Number(majorId) }
+            if (lecturer.facultyId && lecturer.facultyId !== major.facultyId) {
+                throw new BadrequestException("Giảng viên không thuộc khoa này")
+            }
+
+       
+            const existingHomeroom = await prisma.class.findFirst({
+                where: { homeroomLecturerId: lecturerId }
             })
 
-            if (!major) {
-                throw new NotFoundException("Không tìm thấy ngành")
-            }
-
-            if (lecturer.facultyId && lecturer.facultyId !== major.facultyId) {
-                throw new BadrequestException(
-                    "Giảng viên không thuộc khoa này"
-                )
+            if (existingHomeroom) {
+                throw new ConflictException("Giảng viên đã là GVCN của lớp khác")
             }
         }
+
+
         const existingClassName = await prisma.class.findFirst({
-            where: { name: name.trim(), majorId: Number(majorId), NOT: { id: Number(classId) } }
+            where: { name: name.trim(), majorId: mid }
         })
+
         if (existingClassName) {
             throw new ConflictException("Đã tồn tại lớp học ở ngành này")
         }
 
-        const updateClassInfo = await prisma.class.update({
-            where: { id: Number(classId) },
+        const created = await prisma.class.create({
             data: {
                 name: name.trim(),
-                majorId: Number(majorId),
-                homeroomLecturerId: homeroomLecturerId ? Number(homeroomLecturerId) : null
+                majorId: mid,
+                homeroomLecturerId: lecturerId
             }
         })
-        return {
-            updateClassInfo
+
+        return { created }
+    },
+    updateClassInfo: async (classId, data) => {
+        const { name, majorId, homeroomLecturerId } = data
+
+        const cid = Number(classId)
+        const mid = Number(majorId)
+
+
+        if (!Number.isInteger(cid)) {
+            throw new BadrequestException("ClassId không hợp lệ")
         }
+
+ 
+        if (typeof name !== 'string' || name.trim() === '') {
+            throw new BadrequestException("Tên lớp không hợp lệ")
+        }
+
+
+        if (!Number.isInteger(mid)) {
+            throw new BadrequestException('MajorId không hợp lệ')
+        }
+
+ 
+        const existingClass = await prisma.class.findUnique({
+            where: { id: cid }
+        })
+
+        if (!existingClass) {
+            throw new NotFoundException("Không tìm thấy lớp")
+        }
+
+   
+        const major = await prisma.major.findUnique({
+            where: { id: mid }
+        })
+
+        if (!major) {
+            throw new NotFoundException("Không tìm thấy ngành")
+        }
+
+      
+        let lecturerId = null
+
+        if (homeroomLecturerId !== null && homeroomLecturerId !== undefined) {
+
+            lecturerId = Number(homeroomLecturerId)
+
+            if (!Number.isInteger(lecturerId)) {
+                throw new BadrequestException("Giảng viên không hợp lệ")
+            }
+
+            const lecturer = await prisma.lecturer.findUnique({
+                where: { id: lecturerId }
+            })
+
+            if (!lecturer) {
+                throw new NotFoundException("Không tìm thấy giảng viên")
+            }
+
+      
+            if (lecturer.facultyId && lecturer.facultyId !== major.facultyId) {
+                throw new BadrequestException("Giảng viên không thuộc khoa này")
+            }
+
+      
+            const existingHomeroom = await prisma.class.findFirst({
+                where: {
+                    homeroomLecturerId: lecturerId,
+                    NOT: { id: cid }
+                }
+            })
+
+            if (existingHomeroom) {
+                throw new ConflictException("Giảng viên đã là GVCN của lớp khác")
+            }
+        }
+
+       
+        const duplicate = await prisma.class.findFirst({
+            where: {
+                name: name.trim(),
+                majorId: mid,
+                NOT: { id: cid }
+            }
+        })
+
+        if (duplicate) {
+            throw new ConflictException("Đã tồn tại lớp học ở ngành này")
+        }
+
+     
+        const updated = await prisma.class.update({
+            where: { id: cid },
+            data: {
+                name: name.trim(),
+                majorId: mid,
+                homeroomLecturerId: lecturerId
+            }
+        })
+
+        return { updated }
     },
     updateClassStatus: async (classId) => {
         const [cls, hasStudent] = await Promise.all([
@@ -254,18 +313,21 @@ export const classService = {
             classes
         }
     },
-    getClassesByMajor: async (majorId) => {
-        const major = await prisma.major.findUnique({
-            where: { id: Number(majorId) },
+    getClassesByProgram: async (programId) => {
+        const program = await prisma.program.findUnique({
+            where: { id: Number(programId) },
+            include: {
+                major: true
+            }
 
         })
-        if (!major) {
-            throw new NotFoundException("Không tìm thấy chuyên ngành")
+        if (!program) {
+            throw new NotFoundException("Không tìm thấy chương trình")
         }
         const classes = await prisma.class.findMany({
             where: {
                 isActive: true,
-                majorId: Number(majorId)
+                majorId: Number(program.major.id)
             }
         })
         return {

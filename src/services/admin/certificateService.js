@@ -37,7 +37,6 @@ export const certificateService = {
 
     },
     updateCertificateInfo: async (certificateId, data) => {
-        validateMissingFields(data, ['name'])
         const { name, description } = data
 
         if (typeof name !== 'string' || name.trim() === '') {

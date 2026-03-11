@@ -1,4 +1,4 @@
-import { NotFoundException } from "../../common/helpers/exception.helper.js"
+import { BadrequestException, NotFoundException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
 import { getIO } from "../../socket/socket.js"
 
@@ -42,6 +42,29 @@ export const notificationService = {
     },
     sendNotification: async (adminId, data) => {
         const { title, message, userIds } = data
+
+        if (typeof title !== 'string' || title.trim() === '') {
+            throw new BadrequestException("Tiêu đề không hợp lệ")
+        }
+        if (typeof message !== 'string' || message.trim() === '') {
+            throw new BadrequestException("Nội dung không hợp lệ")
+        }
+        if (!adminId) {
+            throw new UnauthorizedException("Không xác định người gửi")
+        }
+        if (userIds !== undefined) {
+            if (!Array.isArray(userIds)) {
+                throw new BadrequestException("userIds phải là mảng")
+            }
+
+            if (userIds.length === 0) {
+                throw new BadrequestException("Danh sách người nhận không được rỗng")
+            }
+
+            if (!userIds.every(id => Number.isInteger(Number(id)))) {
+                throw new BadrequestException("userIds phải là danh sách số")
+            }
+        }
         const io = getIO()
 
         let receivers = userIds
@@ -154,7 +177,7 @@ export const notificationService = {
                 where: { notificationId: Number(notificationId) }
             }),
             prisma.notification.delete({
-                where: { id : Number(notificationId) }
+                where: { id: Number(notificationId) }
             })
         ])
     }

@@ -52,7 +52,6 @@ export const periodService = {
         }
     },
     updatePeriodInfo: async (periodId, data) => {
-        validateMissingFields(data, ['period', 'startTime', 'endTime'])
         const { period, startTime, endTime } = data
 
         if (!Number.isInteger(Number(period))) {

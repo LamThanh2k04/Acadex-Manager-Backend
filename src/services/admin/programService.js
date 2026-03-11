@@ -65,7 +65,6 @@ export const programService = {
         }
     },
     updateProgramInfo: async (programId, data) => {
-        validateMissingFields(data, ['name', 'trainingLevel', 'educationType', 'plannedEducationYear', 'feePerCredit', 'version', 'majorId'])
         const { name, trainingLevel, educationType, plannedEducationYear, feePerCredit, version, majorId } = data
 
         if (typeof name !== 'string' || name.trim() === '') {
@@ -183,12 +182,12 @@ export const programService = {
                 version: true,
                 major: {
                     select: {
-                        id : true,
+                        id: true,
                         name: true,
-                        faculty : {
-                            select : {
-                                id : true,
-                                name : true
+                        faculty: {
+                            select: {
+                                id: true,
+                                name: true
                             }
                         }
                     }
@@ -203,13 +202,13 @@ export const programService = {
         const program = await prisma.program.findUnique({
             where: { id: Number(programId) },
             include: {
-                major : {
-                    select : {
-                        name : true,
-                        faculty : {
-                           select : {
-                            name : true
-                           }
+                major: {
+                    select: {
+                        name: true,
+                        faculty: {
+                            select: {
+                                name: true
+                            }
                         }
                     }
                 },
@@ -236,7 +235,7 @@ export const programService = {
         }
     },
     addSubjectToProgram: async (programId, data) => {
-        validateMissingFields(data, ['subjectIds', 'type'])
+        validateMissingFields(data, ['subjectIds', 'type', 'semesterOrder'])
         const { semesterOrder, type, feePerCredit, subjectIds } = data
 
         if (!Number.isInteger(Number(programId))) {
@@ -278,7 +277,7 @@ export const programService = {
                     subjectId: { in: subjectIds.map(Number) }
                 },
                 select: {
-                    semesterOrder : true,
+                    semesterOrder: true,
                     subject: { select: { name: true } }
                 }
             })
@@ -324,8 +323,6 @@ export const programService = {
         })
     },
     updateSubjectToProgram: async (programSubjectId, data) => {
-
-        validateMissingFields(data, ['type', 'isActive', 'semesterOrder'])
 
         if (!Number.isInteger(Number(programSubjectId))) {
             throw new BadrequestException("ProgramSubject không hợp lệ")
@@ -442,7 +439,7 @@ export const programService = {
                 }
             })
             if (existingCertificate.length > 0) {
-                const names = existingCertificate.map(e => e.certificate.name)
+                const names = existingCertificate.map(e => e.template.name)
                 throw new BadrequestException(
                     `Chứng chỉ đã tồn tại: ${names.join(", ")}`
                 )
@@ -456,27 +453,32 @@ export const programService = {
             })
         })
     },
-    updateCertificateToProgram: async (programCertificateId) => {
+    updateCertificateToProgram: async (programCertificateId, data) => {
 
         if (!Number.isInteger(Number(programCertificateId))) {
             throw new BadrequestException("ProgramCertificate không hợp lệ")
         }
+
+        const { isActive } = data
+
+        if (typeof isActive !== "boolean") {
+            throw new BadrequestException("Trạng thái isActive không hợp lệ")
+        }
+
         const programCertificate = await prisma.programCertificate.findUnique({
             where: { id: Number(programCertificateId) }
         })
+
         if (!programCertificate) {
             throw new NotFoundException("Không tìm thấy chứng chỉ trong chương trình")
         }
 
-        const updateCertificateToProgram = await prisma.programCertificate.update({
+        const updated = await prisma.programCertificate.update({
             where: { id: Number(programCertificateId) },
-            data: {
-                isActive: !programCertificate.isActive
-            }
+            data: { isActive }
         })
-        return {
-            updateCertificateToProgram
-        }
+
+        return updated
     },
     getSemesterOrdersPrgram: async (programId) => {
 
@@ -508,13 +510,13 @@ export const programService = {
             prisma.programSubject.findMany({
                 where: { programId: Number(programId), semesterOrder: Number(semesterOrderId) },
                 select: {
-                    semesterOrder : true,
+                    semesterOrder: true,
                     subject: {
                         select: {
                             id: true,
-                            code : true,
+                            code: true,
                             name: true,
-                            credits : true
+                            credits: true
                         }
                     }
                 },

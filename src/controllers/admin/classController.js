@@ -67,14 +67,14 @@ export const classController = {
             next(err)
         }
     },
-    getClassesByMajor: async (req, res, next) => {
+    getClassesByProgram: async (req, res, next) => {
         try {
-            const majorId = req.params.majorId
-            const data = await classService.getClassesByMajor(majorId)
-            const response = responseSuccess(data, "Lấy danh sách lớp theo ngành thành công")
+            const programId = req.params.programId
+            const data = await classService.getClassesByProgram(programId)
+            const response = responseSuccess(data, "Lấy danh sách lớp theo chương trình thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy danh sách lớp theo ngành thất bại", err)
+            console.error("Lấy danh sách lớp theo chương trình thất bại", err)
             next(err)
         }
     },

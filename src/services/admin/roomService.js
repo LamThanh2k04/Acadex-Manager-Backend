@@ -37,10 +37,7 @@ export const roomService = {
         }
     },
     updateRoomInfo: async (roomId, data) => {
-        validateMissingFields(data, ['name', 'buildingId'])
-
         const { name, buildingId } = data
-
         if (name.trim() === '') {
             throw new BadrequestException("Tên phòng không hợp lệ")
         }

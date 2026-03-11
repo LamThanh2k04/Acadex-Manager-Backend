@@ -490,7 +490,12 @@ export const studentService = {
             where: {
                 enrollments: {
                     some: {
-                        status: 'REGISTERED'
+                        status: 'REGISTERED',
+                        ...(semesterId && {
+                            courseSection: {
+                                semesterId: Number(semesterId)
+                            }
+                        })
                     }
                 }
             },
@@ -501,7 +506,12 @@ export const studentService = {
                 },
                 enrollments: {
                     where: {
-                        status: 'REGISTERED'
+                        status: 'REGISTERED',
+                        ...(semesterId && {
+                            courseSection: {
+                                semesterId: Number(semesterId)
+                            }
+                        })
                     },
                     select: {
                         fee: true,

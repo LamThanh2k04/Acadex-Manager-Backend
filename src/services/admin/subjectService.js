@@ -12,7 +12,7 @@ export const subjectService = {
         if (typeof name !== 'string' || name.trim() === "") {
             throw new BadrequestException("Tên môn không hợp lệ")
         }
-        if (!Number.isInteger(Number(credits))) {
+        if (!Number.isInteger(Number(credits)) || Number(credits) <=0) {
             throw new BadrequestException("Số tín chỉ không hợp lệ")
         }
         if (!Number.isInteger(Number(theoryPeriods)) || Number(theoryPeriods) < 0) {
@@ -57,13 +57,12 @@ export const subjectService = {
         }
     },
     updateSubjectInfo: async (subjectId, data) => {
-        validateMissingFields(data, ['name', 'credits', 'theoryPeriods', 'practicePeriods', 'countToGpa'])
         const { name, credits, theoryPeriods, practicePeriods, countToGpa } = data
 
         if (typeof name !== 'string' || name.trim() === "") {
             throw new BadrequestException("Tên môn không hợp lệ")
         }
-        if (!Number.isInteger(Number(credits))) {
+        if (!Number.isInteger(Number(credits)) || Number(credits) <=0) {
             throw new BadrequestException("Số tín chỉ không hợp lệ")
         }
         if (!Number.isInteger(Number(theoryPeriods)) || Number(theoryPeriods) < 0) {

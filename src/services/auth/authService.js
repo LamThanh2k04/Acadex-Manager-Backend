@@ -1,4 +1,4 @@
-import { BadrequestException, ConflictException, NotFoundException } from "../../common/helpers/exception.helper.js";
+import { BadrequestException, ConflictException, ForbiddenException, NotFoundException, UnauthorizedException } from "../../common/helpers/exception.helper.js";
 import prisma from "../../common/prisma/initPrisma.js";
 import validateEmail from "../../utils/validateEmail.js";
 import validateMissingFields from "../../utils/validateFields.js";
@@ -77,12 +77,12 @@ export const authService = {
                 default:
                     roleText = "người dùng";
             }
-            throw new BadrequestException(`Tài khoản ${roleText} này đã bị khóa.`);
+            throw new ForbiddenException(`Tài khoản ${roleText} này đã bị khóa.`);
         }
 
         const isMatchPassword = await bcrypt.compare(password, user.password);
         if (!isMatchPassword) {
-            throw new BadrequestException("Mật khẩu không đúng");
+            throw new UnauthorizedException("Mật khẩu không đúng");
         }
         const token = generateToken(user.id, user.role, user);
         return {

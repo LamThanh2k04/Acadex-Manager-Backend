@@ -33,13 +33,13 @@ export const facultyService = {
         }
     },
     updateFacultyInfo: async (facultyId, data) => {
-        validateMissingFields(data, ['name'])
         const { name } = data;
+
         if (typeof name !== 'string' || name.trim() === '') {
             throw new BadrequestException("Tên khoa không hợp lệ")
         }
 
-        const [faculty,existingFaculty] = await Promise.all([
+        const [faculty, existingFaculty] = await Promise.all([
             prisma.faculty.findUnique({ where: { id: Number(facultyId) } }),
             prisma.faculty.findFirst({
                 where: {

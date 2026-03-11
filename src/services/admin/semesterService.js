@@ -1,4 +1,4 @@
-import { BadrequestException,NotFoundException } from "../../common/helpers/exception.helper.js"
+import { BadrequestException, ConflictException, NotFoundException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
 import validateMissingFields from "../../utils/validateFields.js"
 
@@ -23,6 +23,16 @@ export const semesterService = {
         if (parsedStartDate >= parsedEndDate) {
             throw new BadrequestException('Ngày kết thúc phải sau ngày bắt đầu')
         }
+        const existingSemester = await prisma.semester.findFirst({
+            where: {
+                name: name.trim(),
+                academicYear: academicYear.trim()
+            }
+        })
+
+        if (existingSemester) {
+            throw new ConflictException("Học kì này đã tồn tại trong niên khóa")
+        }
         const overlappingSemester = await prisma.semester.findFirst({
             where: {
                 AND: [
@@ -46,9 +56,7 @@ export const semesterService = {
             newSemester
         }
     },
-
     updateSemesterInfo: async (semesterId, data) => {
-        validateMissingFields(data, ['name', 'academicYear', 'startDate', 'endDate'])
         const { name, academicYear, startDate, endDate } = data
         const parsedStartDate = new Date(startDate)
         const parsedEndDate = new Date(endDate)
@@ -67,6 +75,17 @@ export const semesterService = {
         }
         if (parsedStartDate >= parsedEndDate) {
             throw new BadrequestException('Ngày kết thúc phải sau ngày bắt đầu')
+        }
+        const existingSemester = await prisma.semester.findFirst({
+            where: {
+                name: name.trim(),
+                academicYear: academicYear.trim(),
+                NOT : {id : Number(semesterId)}
+            }
+        })
+
+        if (existingSemester) {
+            throw new ConflictException("Học kì này đã tồn tại trong niên khóa")
         }
 
         const [semester, overlappingSemester] = await Promise.all([
@@ -122,7 +141,7 @@ export const semesterService = {
         const limit = 10
         const skip = (Number(page) - 1) * limit
         const whereCondition = search ? {
-            OR : [
+            OR: [
                 {
                     name: {
                         contains: search.toLowerCase()
@@ -138,35 +157,35 @@ export const semesterService = {
 
         const [semesters, totalSemesters] = await Promise.all([
             prisma.semester.findMany({
-                where : whereCondition,
-                take : limit,
-                skip : skip,
-                orderBy : {createdAt : 'desc'}
+                where: whereCondition,
+                take: limit,
+                skip: skip,
+                orderBy: { createdAt: 'desc' }
             }),
             prisma.semester.count({
-                where : whereCondition
+                where: whereCondition
             })
         ])
         return {
             semesters,
-            pagination : {
-                page : Number(page),
-                limit : limit,
-                total : totalSemesters,
-                totalPages: Math.ceil(totalSemesters/limit)
+            pagination: {
+                page: Number(page),
+                limit: limit,
+                total: totalSemesters,
+                totalPages: Math.ceil(totalSemesters / limit)
             }
         }
     },
-    getAllSemestersSimple : async () => {
+    getAllSemestersSimple: async () => {
         const semesters = await prisma.semester.findMany({
-            where : {isActive : true},
-            orderBy : {id : 'desc'},
-            select : {
-                id : true,
+            where: { isActive: true },
+            orderBy: { id: 'desc' },
+            select: {
+                id: true,
                 name: true,
-                academicYear : true,
-                startDate : true,
-                endDate : true
+                academicYear: true,
+                startDate: true,
+                endDate: true
             }
         })
         return {

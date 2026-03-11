@@ -49,7 +49,6 @@ export const buildingService = {
         }
     },
     updateBuildingInfo : async (buildingId,data) => {
-        validateMissingFields(data,['name','symbol','location'])
         const {name,symbol,location} = data;
 
         if ( typeof name !== 'string' || name.trim() === '') {

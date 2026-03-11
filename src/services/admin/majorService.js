@@ -46,9 +46,7 @@ export const majorService = {
         }
     },
     updateMajorInfo: async (majorId, data) => {
-        validateMissingFields(data, ['name', 'facultyId'])
         const { name, facultyId } = data;
-
         if (typeof name !== 'string' || name.trim() === '') {
             throw new BadrequestException("Tên ngành không hợp lệ")
         }
