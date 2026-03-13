@@ -25,7 +25,7 @@ export const authController = {
             })
 
             const response = responseSuccess(
-                { data },   // ❌ không trả token nữa
+                 data ,   // ❌ không trả token nữa
                 "Đăng nhập thành công"
             )
 
