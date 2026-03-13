@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { UnauthorizedException } from '../helpers/exception.helper.js';
 
 const authMiddleware = (req,res,next) => {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.cookies?.token
     if (!token) {
         throw new UnauthorizedException("Token không hợp lệ hoặc không đúng định dạng")
     }
