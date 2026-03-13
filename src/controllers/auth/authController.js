@@ -15,9 +15,9 @@ export const authController = {
     login: async (req, res, next) => {
         try {
             const data = await authService.login(req.body)
-
+            console.log(data.token.accessToken)
             // ⭐ SET COOKIE JWT
-            res.cookie("token", data.accessToken, {
+            res.cookie("token", data.token.accessToken, {
                 httpOnly: true,        // FE không đọc được → an toàn
                 secure: false,         // localhost = false
                 sameSite: "lax",
