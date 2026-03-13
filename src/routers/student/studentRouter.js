@@ -9,6 +9,8 @@ import gradesResultsRouter from '../student/gradesResultsRouter.js'
 import aiRouter from '../student/aiRouter.js'
 import resetRouter from '../student/resetRouter.js'
 import notificationRouter from '../student/notificationRouter.js'
+import dashboardRouter from '../student/dashboardRouter.js'
+import attendanceRouter from '../student/attendanceRouter.js'
 const router = express.Router()
 
 router.use('/profileStudent',profileStudentRouter)
@@ -21,4 +23,6 @@ router.use('/grades',gradesResultsRouter)
 router.use('/ai',aiRouter)
 router.use('/reset',resetRouter)
 router.use('/notification',notificationRouter)
+router.use('/dashboard',dashboardRouter)
+router.use('/attendance',attendanceRouter)
 export default router

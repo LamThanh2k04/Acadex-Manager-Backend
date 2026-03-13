@@ -18,6 +18,10 @@ export const initSocket = (server) => {
 
         console.log("connected:", userId)
 
+         socket.on("join-attendance", (sessionId) => {
+            socket.join(`attendance_${sessionId}`)
+            console.log(`user ${userId} joined attendance_${sessionId}`)
+        })
     })
 }
 

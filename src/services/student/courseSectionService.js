@@ -2,14 +2,15 @@ import { BadrequestException, ConflictException, NotFoundException } from "../..
 import prisma from "../../common/prisma/initPrisma.js"
 
 export const courseSectionSecvice = {
-    getAllSemesters: async () => {
+    getAllSemestersSimple: async () => {
         const semesters = await prisma.semester.findMany({
             where: { isActive: true },
             select: {
                 id: true,
                 name: true,
                 academicYear: true
-            }
+            },
+            orderBy : {id : 'desc'}
         })
         return {
             semesters

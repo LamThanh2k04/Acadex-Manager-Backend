@@ -51,6 +51,29 @@ export const dashboardService = {
             total
         }
     },
+    getTotalGenders: async () => {
+        const [males, females, total] = await Promise.all([
+            prisma.user.count({
+                where: {
+                    gender: "MALE",
+                }
+            }),
+            prisma.user.count({
+                where: {
+                    gender: 'FEMALE'
+                }
+            }),
+            prisma.user.count({
+                where: {
+                }
+            })
+        ])
+        return {
+            males,
+            females,
+            total
+        }
+    },
     getPassFailStatus: async (subjectId) => {
 
         const [passed, failed] = await Promise.all([
@@ -150,5 +173,51 @@ export const dashboardService = {
             result
         }
 
+    },
+    getOverViewFull: async () => {
+        const [
+            revenue,
+            students,
+            lecturers,
+            courses,
+            subjects,
+            faculties,
+            majors,
+            classes,
+            schedules,
+            examSchedules,
+            rooms,
+            buildings,
+            programs
+        ] = await Promise.all([
+            prisma.payment.aggregate({ where: { status: "SUCCESS" }, _sum: { amount: true } }),
+            prisma.student.count(),
+            prisma.lecturer.count(),
+            prisma.courseSection.count({ where: { isActive: true } }),
+            prisma.subject.count(),
+            prisma.faculty.count(),
+            prisma.major.count(),
+            prisma.class.count(),
+            prisma.schedule.count(),
+            prisma.examSchedule.count(),
+            prisma.room.count(),
+            prisma.building.count(),
+            prisma.program.count()
+        ])
+        return {
+            totalRevenue: revenue._sum.amount || 0,
+            totalStudents: students,
+            totalLecturers: lecturers,
+            totalCourses: courses,
+            totalSubjects: subjects,
+            totalFaculties: faculties,
+            totalMajors: majors,
+            totalClasses: classes,
+            totalSchedules: schedules,
+            totalExamSchedules: examSchedules,
+            totalRooms: rooms,
+            totalBuildings: buildings,
+            totalPrograms: programs
+        }
     }
 }

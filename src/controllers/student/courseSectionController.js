@@ -2,9 +2,9 @@ import { responseSuccess } from "../../common/helpers/response.helper.js"
 import { courseSectionSecvice } from "../../services/student/courseSectionService.js"
 
 export const courseSectionController = {
-    getAllSemesters: async (req, res, next) => {
+    getAllSemestersSimple: async (req, res, next) => {
         try {
-            const data = await courseSectionSecvice.getAllSemesters()
+            const data = await courseSectionSecvice.getAllSemestersSimple()
             const response = responseSuccess(data, 'Lấy học kì thực tế thành công')
             res.status(response.status).json(response)
         } catch (err) {

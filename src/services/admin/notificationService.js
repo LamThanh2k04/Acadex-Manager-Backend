@@ -102,11 +102,7 @@ export const notificationService = {
 
         receivers.forEach(id => {
 
-            io.to(`user_${id}`).emit("notification", {
-                id: notification.id,
-                title,
-                message
-            })
+            io.to(`user_${id}`).emit("notification:new")
 
         })
 
