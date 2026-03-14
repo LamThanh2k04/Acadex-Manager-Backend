@@ -156,9 +156,9 @@ export const dashboardService = {
         }
 
         return {
-            totalPresentRate: Number((present / total) * 100),
-            totalAbsentRate: Number((absent / total) * 100),
-            totalExcusedRate: Number((excused / total) * 100),
+            totalPresentRate: Math.round((present / total) * 100),
+            totalAbsentRate: Math.round((absent / total) * 100),
+            totalExcusedRate: Math.round((excused / total) * 100),
         }
     },
     getAvgGradeByClass: async (lecturerUserId) => {
