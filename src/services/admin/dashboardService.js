@@ -125,7 +125,8 @@ export const dashboardService = {
                 gpa: true,
                 user: {
                     select: {
-                        fullName: true
+                        fullName: true,
+                        avatar : true,
                     }
                 }
             }
