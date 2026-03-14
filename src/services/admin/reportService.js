@@ -30,6 +30,8 @@ const createSection = (title) => ([
   }
 ])
 
+
+
 const createTable = (headers, rows) => ({
   table: {
     headerRows: 1,
@@ -69,16 +71,51 @@ export const reportService = {
     const overview = await dashboardService.getOverViewFull()
     const gender = await dashboardService.getTotalGenders()
     const passfail = await dashboardService.getPassFailStatus()
-    const revenue = await dashboardService.getLineChartRevenueLineChart(year)
+    const revenue = await dashboardService.getRevenueAllTimeByMonth()
     const topStudents = await dashboardService.getTopStudentGpa()
 
     const genderChart = await chartService.genderPie(gender)
     const passFailChart = await chartService.passFailPie(passfail)
-    const revenueChart = await chartService.revenueLine(revenue.result, year)
+    const revenueChart = await chartService.revenueLineAuto(revenue.result)
 
     const genderTotal = gender.total || 1
     const passTotal = passfail.total || 1
+    const years = [...new Set(revenue.result.map(m => m.month.slice(0, 4)))]
+    const isOneYear = years.length === 1
 
+    let revenueTitle = ""
+    let tableHeaders = []
+    let tableRows = []
+
+    if (isOneYear) {
+      const year = years[0]
+      const monthMap = {}
+      revenue.result.forEach(m => monthMap[m.month] = m.total)
+
+      revenueTitle = `IV. Doanh thu toàn hệ thống theo tháng năm ${year}`
+      tableHeaders = ["Tháng", "Doanh thu"]
+
+      tableRows = []
+      for (let i = 1; i <= 12; i++) {
+        const key = `${year}-${String(i).padStart(2, '0')}`
+        tableRows.push([key, formatNumber(monthMap[key] || 0)])
+      }
+
+    } else {
+      const yearMap = {}
+
+      revenue.result.forEach(m => {
+        const y = m.month.slice(0, 4)
+        if (!yearMap[y]) yearMap[y] = 0
+        yearMap[y] += m.total
+      })
+
+      revenueTitle = "IV. Doanh thu toàn hệ thống theo năm"
+      tableHeaders = ["Năm", "Doanh thu"]
+      tableRows = Object.entries(yearMap).map(
+        ([y, total]) => [y, formatNumber(total)]
+      )
+    }
     const doc = {
       pageSize: "A4",
       pageMargins: [40, 60, 40, 60],
@@ -99,7 +136,7 @@ export const reportService = {
           margin: [0, 0, 0, 25]
         },
 
-       
+
         ...createSection("I. Tổng quan hệ thống"),
         createTable(
           ["Chỉ số", "Giá trị"],
@@ -120,7 +157,7 @@ export const reportService = {
           ]
         ),
 
-       
+
         ...createSection("II. Cơ cấu giới tính"),
         {
           image: toBase64Image(genderChart),
@@ -136,11 +173,11 @@ export const reportService = {
           ]
         ),
 
-    
+
         ...createSection("III. Kết quả học tập"),
         {
           image: toBase64Image(passFailChart),
-          width: 220, 
+          width: 220,
           alignment: "center",
           margin: [0, 10, 0, 15]
         },
@@ -152,23 +189,20 @@ export const reportService = {
           ]
         ),
 
-        ...createSection(`IV. Doanh thu theo tháng năm ${year}`),
+        ...createSection(revenueTitle),
         {
           image: toBase64Image(revenueChart),
           width: 480,
           alignment: "center",
           margin: [0, 10, 0, 15]
         },
-        createTable(
-          ["Tháng", "Doanh thu"],
-          revenue.result.map(m => [m.month, formatNumber(m.total)])
-        ),
+        createTable(tableHeaders, tableRows),
 
-       
+
         ...createSection("V. Top sinh viên GPA cao"),
         createTable(
-          ["STT","Mã SV", "Họ tên", "GPA"],
-          topStudents.students.map((s,i) => [
+          ["STT", "Mã SV", "Họ tên", "GPA"],
+          topStudents.students.map((s, i) => [
             i + 1,
             s.studentCode,
             s.user.fullName,

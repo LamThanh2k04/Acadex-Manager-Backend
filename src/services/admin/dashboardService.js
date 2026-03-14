@@ -120,13 +120,13 @@ export const dashboardService = {
             orderBy: { gpa: 'desc' },
             take: limit,
             select: {
-                id : true,
+                id: true,
                 studentCode: true,
                 gpa: true,
                 user: {
                     select: {
                         fullName: true,
-                        avatar : true,
+                        avatar: true,
                     }
                 }
             }
@@ -176,6 +176,27 @@ export const dashboardService = {
         }
 
     },
+    getRevenueAllTimeByMonth: async () => {
+    const payments = await prisma.payment.findMany({
+        where: { status: 'SUCCESS' },
+        select: { amount: true, payDate: true }
+    })
+
+    const revenueMap = {}
+
+    payments.forEach(p => {
+        const d = new Date(p.payDate)
+        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+        if (!revenueMap[key]) revenueMap[key] = 0
+        revenueMap[key] += p.amount
+    })
+
+    const result = Object.entries(revenueMap)
+        .sort(([a],[b]) => new Date(a) - new Date(b))
+        .map(([month,total]) => ({ month, total }))
+
+    return { result }
+},
     getOverViewFull: async () => {
         const [
             revenue,

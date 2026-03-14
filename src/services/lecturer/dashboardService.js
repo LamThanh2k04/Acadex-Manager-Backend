@@ -1,5 +1,5 @@
-import { NotFoundException } from "../../common/helpers/exception.helper"
-import prisma from "../../common/prisma/initPrisma"
+import { NotFoundException } from "../../common/helpers/exception.helper.js"
+import prisma from "../../common/prisma/initPrisma.js"
 
 export const dashboardService = {
     getOverView: async (lecturerUserId) => {
@@ -26,8 +26,8 @@ export const dashboardService = {
         const [
             teachingStudentIds,
             homeroomStudentIds,
-            totalClassesTeaching,
-            totalClassesHomeroom,
+            teachingClasseIds,
+            homeroomClasseIds,
             totalSchedulesToday,
             totalPresentAttendance,
             totalAttendance
@@ -50,11 +50,16 @@ export const dashboardService = {
                 select: { id: true }
             }),
 
-            prisma.courseSection.count({
-                where: { lecturerId: lecturer.id }
+            prisma.courseSection.findMany({
+                where: { lecturerId: lecturer.id },
+                select: {
+                    plannedClassId: true
+                },
+                distinct: ['plannedClassId']
+
             }),
 
-            prisma.class.count({
+            prisma.class.findMany({
                 where: { homeroomLecturerId: lecturer.id }
             }),
 
@@ -84,12 +89,13 @@ export const dashboardService = {
 
 
         const studentSet = new Set()
-
+        const classSet = new Set
         teachingStudentIds.forEach(s => studentSet.add(s.studentId))
         homeroomStudentIds.forEach(s => studentSet.add(s.id))
-
+        teachingClasseIds.forEach(s => classSet.add(s.plannedClassId))
+        homeroomClasseIds.forEach(s => classSet.add(s.id))
         const totalStudents = studentSet.size
-
+        const totalClasses = classSet.size
 
         const attendanceRate =
             totalAttendance === 0
@@ -98,48 +104,49 @@ export const dashboardService = {
 
         return {
             totalStudents,
-            totalClasses: totalClassesTeaching + totalClassesHomeroom,
+            totalClasses,
             totalSchedulesToday,
             attendanceRate
         }
     },
-    getAttendanceRate: async (lecturerId, courseSectionId) => {
+    getAttendanceRate: async (lecturerUserId, courseSectionId) => {
         const lecturer = await prisma.lecturer.findUnique({
-            where: { userId: lecturerId }
+            where: { userId: lecturerUserId }
         })
+
         if (!lecturer) {
             throw new NotFoundException('Không tìm thấy giảng viên này')
         }
-        const whereCondition = {
 
-            ...(courseSectionId ? {
-                id: Number(courseSectionId)
-            } : {}),
-            lecturerId: lecturer.id
+        const whereCondition = {
+            lecturerId: lecturer.id,
+            ...(courseSectionId && { id: Number(courseSectionId) })
         }
 
-        const records = await prisma.attendance.findMany({
+        const grouped = await prisma.attendance.groupBy({
+            by: ['status'],
             where: {
                 session: {
                     schedule: {
                         courseSection: whereCondition
                     }
-                },
+                }
             },
-            select: {
-                status: true
-            }
+            _count: { status: true }
         })
+
         let present = 0
         let absent = 0
         let excused = 0
 
-        for (const r of records) {
-            if (r.status === "PRESENT") present++
-            if (r.status === "ABSENT") absent++
-            if (r.status === "EXCUSED") excused++
+        for (const g of grouped) {
+            if (g.status === 'PRESENT') present = g._count.status
+            if (g.status === 'ABSENT') absent = g._count.status
+            if (g.status === 'EXCUSED') excused = g._count.status
         }
-        total = records.length
+
+        const total = present + absent + excused
+
         if (total === 0) {
             return {
                 totalPresentRate: 0,
@@ -147,17 +154,15 @@ export const dashboardService = {
                 totalExcusedRate: 0,
             }
         }
-        const presentRate = Number(((present / total) * 100).toFixed(2))
-        const absentRate = Number(((absent / total) * 100).toFixed(2))
-        const excusedRate = Number(((excused / total) * 100).toFixed(2))
+
         return {
-            totalPresentRate: presentRate,
-            totalAbsentRate: absentRate,
-            totalExcusedRate: excusedRate,
+            totalPresentRate: Number((present / total) * 100),
+            totalAbsentRate: Number((absent / total) * 100),
+            totalExcusedRate: Number((excused / total) * 100),
         }
     },
     getAvgGradeByClass: async (lecturerUserId) => {
-        // 1️⃣ Tìm giảng viên
+
         const lecturer = await prisma.lecturer.findUnique({
             where: { userId: lecturerUserId }
         })
@@ -166,7 +171,7 @@ export const dashboardService = {
             throw new BadrequestException("Không tìm thấy giảng viên")
         }
 
-        // 2️⃣ Lấy các lớp giảng viên dạy
+
         const sections = await prisma.courseSection.findMany({
             where: {
                 lecturerId: lecturer.id,
@@ -175,6 +180,11 @@ export const dashboardService = {
             select: {
                 id: true,
                 sectionCode: true,
+                plannedClass: {
+                    select: {
+                        name: true
+                    }
+                },
                 enrollments: {
                     select: {
                         grades: {
@@ -187,7 +197,7 @@ export const dashboardService = {
             }
         })
 
-        // 3️⃣ Tính điểm trung bình từng lớp
+
         const result = sections.map(section => {
             const scores = section.enrollments
                 .map(e => e.grades?.totalScore)
@@ -199,7 +209,7 @@ export const dashboardService = {
                     : scores.reduce((a, b) => a + b, 0) / scores.length
 
             return {
-                className: section.sectionCode,
+                className: section.plannedClass.name,
                 avgScore: Number(avg.toFixed(2))
             }
         })
