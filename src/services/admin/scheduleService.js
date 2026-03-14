@@ -294,6 +294,7 @@ export const scheduleService = {
                     },
                     room: {
                         select: {
+                            id : true,
                             name: true,
                             building: {
                                 select: {

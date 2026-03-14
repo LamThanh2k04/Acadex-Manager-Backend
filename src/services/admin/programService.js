@@ -154,6 +154,7 @@ export const programService = {
                 include: {
                     major: {
                         select: {
+                            id : true,
                             name: true
                         }
                     }
@@ -222,6 +223,7 @@ export const programService = {
                 },
                 programCertificates: {
                     select: {
+                        id : true,
                         template: true
                     }
                 }

@@ -364,6 +364,7 @@ export const examScheduleService = {
                     },
                     room: {
                         select: {
+                            id: true,
                             name: true,
                             building: {
                                 select: {

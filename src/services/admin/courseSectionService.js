@@ -183,11 +183,13 @@ export const courseSectionService = {
                     },
                     plannedClass: {
                         select: {
+                            id : true,
                             name: true
                         }
                     },
                     lecturer: {
                         select: {
+                            id : true,
                             user: {
                                 select: {
                                     fullName: true
