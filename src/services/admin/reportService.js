@@ -23,7 +23,7 @@ const createSection = (title) => ([
       {
         type: "rect",
         x: 0, y: 0, w: 515, h: 0.5,
-        color: "#CBD5E1"
+        color: "#FDBA74"
       }
     ],
     margin: [0, 6, 0, 12]
@@ -39,7 +39,7 @@ const createTable = (headers, rows) => ({
       ...rows.map((row, i) =>
         row.map(cell => ({
           text: String(cell),
-          fillColor: i % 2 === 0 ? "#F8FAFC" : null
+          fillColor: i % 2 === 0 ? "#FFF7ED" : null
         }))
       )
     ]
@@ -47,8 +47,8 @@ const createTable = (headers, rows) => ({
   layout: {
     hLineWidth: () => 0.6,
     vLineWidth: () => 0.6,
-    hLineColor: () => "#E2E8F0",
-    vLineColor: () => "#E2E8F0",
+    hLineColor: () => "#FED7AA",
+    vLineColor: () => "#FED7AA",
     paddingLeft: () => 10,
     paddingRight: () => 10,
     paddingTop: () => 7,
@@ -64,7 +64,7 @@ const toBase64Image = (buffer) =>
   `data:image/png;base64,${buffer.toString("base64")}`
 
 export const reportService = {
-  async exportDashboard(year, res) {
+  async exportReportPdf(year, res) {
 
     const overview = await dashboardService.getOverViewFull()
     const gender = await dashboardService.getTotalGenders()
@@ -99,7 +99,7 @@ export const reportService = {
           margin: [0, 0, 0, 25]
         },
 
-        // ===== OVERVIEW =====
+       
         ...createSection("I. Tổng quan hệ thống"),
         createTable(
           ["Chỉ số", "Giá trị"],
@@ -120,7 +120,7 @@ export const reportService = {
           ]
         ),
 
-        // ===== GENDER =====
+       
         ...createSection("II. Cơ cấu giới tính"),
         {
           image: toBase64Image(genderChart),
@@ -164,11 +164,12 @@ export const reportService = {
           revenue.result.map(m => [m.month, formatNumber(m.total)])
         ),
 
-        // ===== TOP GPA =====
+       
         ...createSection("V. Top sinh viên GPA cao"),
         createTable(
-          ["Mã SV", "Họ tên", "GPA"],
-          topStudents.students.map(s => [
+          ["STT","Mã SV", "Họ tên", "GPA"],
+          topStudents.students.map((s,i) => [
+            i + 1,
             s.studentCode,
             s.user.fullName,
             s.gpa
@@ -181,7 +182,7 @@ export const reportService = {
           fontSize: 22,
           bold: true,
           alignment: "center",
-          color: "#0F172A"
+          color: "#C2410C"
         },
         meta: {
           fontSize: 10,
@@ -190,11 +191,11 @@ export const reportService = {
         sectionTitle: {
           fontSize: 15,
           bold: true,
-          color: "#1D4ED8"
+          color: "#EA580C"
         },
         tableHeader: {
           bold: true,
-          fillColor: "#E2E8F0",
+          fillColor: "#FB923C",
           color: "#0F172A",
           alignment: "center"
         }

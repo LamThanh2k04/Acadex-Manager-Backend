@@ -3,6 +3,6 @@ import { reportController } from '../../controllers/admin/reportController.js'
 
 const router = express.Router()
 
-router.get('/exportDashboard',reportController.exportDashboard)
+router.get('/exportReportPdf',reportController.exportReportPdf)
 
 export default router
