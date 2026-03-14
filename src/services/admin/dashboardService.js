@@ -120,6 +120,7 @@ export const dashboardService = {
             orderBy: { gpa: 'desc' },
             take: limit,
             select: {
+                id : true,
                 studentCode: true,
                 gpa: true,
                 user: {
