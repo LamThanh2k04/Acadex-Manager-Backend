@@ -271,6 +271,7 @@ export const studentService = {
                     dateOfBirth: true,
                     phoneNumber: true,
                     address: true,
+                    isActive : true,
                     student: {
                         select: {
                             id: true,
