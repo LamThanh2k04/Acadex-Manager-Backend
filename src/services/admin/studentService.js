@@ -295,6 +295,7 @@ export const studentService = {
                                             }
                                         }
                                     },
+                                    id : true,
                                     name: true,
                                 }
                             },

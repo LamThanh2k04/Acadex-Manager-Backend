@@ -294,6 +294,7 @@ export const lecturerService = {
                             },
                             major: {
                                 select: {
+                                    id : true,
                                     name: true
                                 }
                             }
