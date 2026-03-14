@@ -25,12 +25,12 @@ export const dashboardController = {
     },
     getGenders: async (req, res, next) => {
         try {
-            const role = req.query.role || "STUDENT"
+            const role = req.query.role 
             const data = await dashboardService.getGenders(role)
-            const response = responseSuccess(data, "Lấy tổng giới tính nam/nữ và tổng sinh viên/giảng viên thành công")
+            const response = responseSuccess(data, "Lấy giới tính nam/nữ toàn hệ thống hoặc giới tính nam nữ theo role thành công")
             res.status(response.status).json(response)
         } catch (err) {
-            console.error("Lấy tổng giới tính nam/nữ và tổng sinh viên/giảng viên thất bại", err)
+            console.error("Lấy giới tính nam/nữ toàn hệ thống hoặc giới tính nam nữ theo role thất bại", err)
             next(err)
         }
     },
