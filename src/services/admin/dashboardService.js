@@ -1,3 +1,4 @@
+import { skip } from "@prisma/client/runtime/library"
 import prisma from "../../common/prisma/initPrisma.js"
 
 export const dashboardService = {
@@ -177,26 +178,26 @@ export const dashboardService = {
 
     },
     getRevenueAllTimeByMonth: async () => {
-    const payments = await prisma.payment.findMany({
-        where: { status: 'SUCCESS' },
-        select: { amount: true, payDate: true }
-    })
+        const payments = await prisma.payment.findMany({
+            where: { status: 'SUCCESS' },
+            select: { amount: true, payDate: true }
+        })
 
-    const revenueMap = {}
+        const revenueMap = {}
 
-    payments.forEach(p => {
-        const d = new Date(p.payDate)
-        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
-        if (!revenueMap[key]) revenueMap[key] = 0
-        revenueMap[key] += p.amount
-    })
+        payments.forEach(p => {
+            const d = new Date(p.payDate)
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+            if (!revenueMap[key]) revenueMap[key] = 0
+            revenueMap[key] += p.amount
+        })
 
-    const result = Object.entries(revenueMap)
-        .sort(([a],[b]) => new Date(a) - new Date(b))
-        .map(([month,total]) => ({ month, total }))
+        const result = Object.entries(revenueMap)
+            .sort(([a], [b]) => new Date(a) - new Date(b))
+            .map(([month, total]) => ({ month, total }))
 
-    return { result }
-},
+        return { result }
+    },
     getOverViewFull: async () => {
         const [
             revenue,
@@ -241,6 +242,84 @@ export const dashboardService = {
             totalRooms: rooms,
             totalBuildings: buildings,
             totalPrograms: programs
+        }
+    },
+    getAllSchedules: async (date,page) => {
+        const limit = 3
+        const skip = (Number(page) - 1) * limit
+        const getDayOfWeek = (date) => {
+            const jsDay = new Date(date).getDay()
+            return jsDay === 0 ? 8 : jsDay + 1
+        }
+        const targetDate = new Date(date)
+        const dayOfweek = getDayOfWeek(date)
+
+        const [schedules, totalSchedules] = await Promise.all([
+            prisma.schedule.findMany({
+                where: {
+                    startDate: { lte: targetDate },
+                    endDate: { gte: targetDate },
+                    dayOfWeek: dayOfweek,
+                    isActive: true
+                },
+                take: limit, 
+                skip: skip,
+                orderBy : {startTimeMinutes : 'asc'},
+                select : {
+                    id : true,
+                    dayOfWeek : true,
+                    startTimeMinutes : true,
+                    endTimeMinutes : true,
+                    type : true,
+                    room : {
+                        select : {
+                            id : true,
+                            name : true,
+                            building : {
+                                select : {
+                                    id : true,
+                                    symbol : true
+                                }
+                            }
+                        }
+                    },
+                    courseSection : {
+                        select : {
+                            id: true,
+                            sectionCode : true,
+                            subject : {
+                                select : {
+                                    id : true,
+                                    name : true
+                                }
+                            },
+                            plannedClass : {
+                                select : {
+                                    id: true,
+                                    name : true
+                                }
+                            }
+                        }
+                    }
+                }
+            }),
+            prisma.schedule.count({
+                 where: {
+                    startDate: { lte: targetDate },
+                    endDate: { gte: targetDate },
+                    dayOfWeek: dayOfweek,
+                    isActive: true
+                }
+            })
+        ])
+        return {
+            schedules,
+            pagination : {
+                page : Number(page),
+                limit : limit,
+                total : totalSchedules,
+                totalPages: Math.ceil(totalSchedules/limit)
+            }
         }
     }
 }

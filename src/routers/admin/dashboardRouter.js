@@ -8,5 +8,5 @@ router.get('/getGenders',dashboardController.getGenders)
 router.get('/getPassFailStatus',dashboardController.getPassFailStatus)
 router.get('/getTopStudentGpa',dashboardController.getTopStudentGpa)
 router.get('/getLineChartRevenueLineChart',dashboardController.getLineChartRevenueLineChart)
-
+router.get('/getAllSchedules',dashboardController.getAllSchedules)
 export default router

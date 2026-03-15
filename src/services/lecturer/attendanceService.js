@@ -31,7 +31,7 @@ const startRotateCode = (sessionId) => {
 export const attendanceService = {
     getAllSchedulesLecturer: async (lecturerId, date) => {
         const getDayOfWeek = (date) => {
-            const jsDay = new Date(date).getDay() // 0-6
+            const jsDay = new Date(date).getDay() 
             return jsDay === 0 ? 8 : jsDay + 1
         }
         const lecturer = await prisma.lecturer.findUnique({

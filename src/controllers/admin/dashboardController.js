@@ -65,5 +65,17 @@ export const dashboardController = {
             console.error("Lấy doanh thu của những tháng trong năm thất bại", err)
             next(err)
         }
+    },
+    getAllSchedules: async (req,res,next) => {
+        try {
+            const date = req.query.date || new Date()
+            const page = req.query.page || 1
+            const data = await dashboardService.getAllSchedules(date,page)
+            const response = responseSuccess(data,'Lấy danh sách lịch có phân trang thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy danh sách lịch có phân trang thất bại',err)
+            next(err)
+        }
     }
 }
