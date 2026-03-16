@@ -342,7 +342,6 @@ export const lecturerService = {
         }
     },
     resetPasswordLecturer: async (lecturerId, data) => {
-        validateMissingFields(data, ['newPassword'])
 
         const { newPassword } = data
         if (typeof newPassword !== 'string' || newPassword.trim() === '') {

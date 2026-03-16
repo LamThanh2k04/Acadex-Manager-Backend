@@ -1,9 +1,11 @@
 import { BadrequestException, NotFoundException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
 import bcrypt from 'bcrypt'
+import validatePassword from "../../utils/validatePassword.js"
 export const resetService = {
     resetPassword: async (lecturerId, data) => {
         const { oldPassword, newPassword, confirmPassword } = data
+        validatePassword(newPassword)
         if (!oldPassword || !newPassword || !confirmPassword) {
             throw new BadrequestException("Thiếu thông tin mật khẩu");
         }

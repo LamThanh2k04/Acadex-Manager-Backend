@@ -3,6 +3,7 @@ import prisma from "../../common/prisma/initPrisma.js"
 import bcrypt from 'bcrypt'
 export const resetService = {
     resetPassword: async (studentId, data) => {
+        validatePassword(newPassword)
         const { oldPassword, newPassword, confirmPassword } = data
         if (!oldPassword || !newPassword || !confirmPassword) {
             throw new BadrequestException("Thiếu thông tin mật khẩu");
@@ -23,7 +24,7 @@ export const resetService = {
         }
         const hashPassword = await bcrypt.hash(newPassword, 10)
 
-       await prisma.user.update({
+        await prisma.user.update({
             where: { id: Number(studentId) },
             data: {
                 password: hashPassword

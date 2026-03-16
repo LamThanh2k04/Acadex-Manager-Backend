@@ -343,6 +343,7 @@ export const studentService = {
     },
     resetPasswordStudent: async (studentId, data) => {
         const { newPassword } = data
+        validatePassword(newPassword)
         const student = await prisma.student.findUnique({
             where: { id: Number(studentId) },
             include: {
