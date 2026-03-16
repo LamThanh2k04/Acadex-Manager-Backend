@@ -33,7 +33,7 @@ export const studentService = {
         validateEmail(email, 'STUDENT')
         validatePassword(password)
 
-        const [cls, program, existingStudentCode] = await Promise.all([
+        const [cls, program, existingStudentCode,existingStudentEmail] = await Promise.all([
             prisma.class.findUnique({
                 where: { id: Number(classId) }
             }),
@@ -55,6 +55,9 @@ export const studentService = {
         }
         if (existingStudentCode) {
             throw new ConflictException("Mã sinh viên đã tồn tại")
+        }
+        if(existingStudentEmail) {
+            throw new ConflictException('Email của sinh viên đã tồn tại')
         }
         if (program.majorId !== cls.majorId) {
             throw new BadrequestException("Chương trình không thuộc chuyên ngành của lớp")
@@ -302,6 +305,7 @@ export const studentService = {
                             },
                             program: {
                                 select: {
+                                    id : true,
                                     name: true
                                 }
                             },
