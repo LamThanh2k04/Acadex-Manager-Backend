@@ -33,7 +33,7 @@ export const studentService = {
         validateEmail(email, 'STUDENT')
         validatePassword(password)
 
-        const [cls, program, existingStudentCode,existingStudentEmail] = await Promise.all([
+        const [cls, program, existingStudentCode, existingStudentEmail] = await Promise.all([
             prisma.class.findUnique({
                 where: { id: Number(classId) }
             }),
@@ -45,6 +45,9 @@ export const studentService = {
             }),
             prisma.student.findUnique({
                 where: { studentCode: studentCode }
+            }),
+            prisma.user.findUnique({
+                where: { email: email }
             })
         ])
         if (!cls) {
@@ -56,7 +59,7 @@ export const studentService = {
         if (existingStudentCode) {
             throw new ConflictException("Mã sinh viên đã tồn tại")
         }
-        if(existingStudentEmail) {
+        if (existingStudentEmail) {
             throw new ConflictException('Email của sinh viên đã tồn tại')
         }
         if (program.majorId !== cls.majorId) {
@@ -274,7 +277,7 @@ export const studentService = {
                     dateOfBirth: true,
                     phoneNumber: true,
                     address: true,
-                    isActive : true,
+                    isActive: true,
                     student: {
                         select: {
                             id: true,
@@ -299,13 +302,13 @@ export const studentService = {
                                             }
                                         }
                                     },
-                                    id : true,
+                                    id: true,
                                     name: true,
                                 }
                             },
                             program: {
                                 select: {
-                                    id : true,
+                                    id: true,
                                     name: true
                                 }
                             },
