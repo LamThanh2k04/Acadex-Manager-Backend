@@ -12,5 +12,17 @@ export const notificationController = {
             console.error('Lấy danh sách thông báo sinh viên này thất bại',err)
             next(err)
         }
+    },
+     getInfoNotification : async (req,res,next) => {
+        try {
+            const studentId = req.user.id
+            const notificationId = req.params.notificationId
+            const data = await notificationService.getInfoNotification(notificationId,studentId)
+            const response = responseSuccess(data,'Lấy thông tin thông báo của sinh viên thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy thông tin thông báo của sinh viên thất bại',err)
+            next(err)
+        }
     }
 }

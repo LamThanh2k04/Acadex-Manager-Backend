@@ -4,5 +4,5 @@ import { notificationController } from '../../controllers/student/notificationCo
 const router = express.Router()
 
 router.get('/getAllNotifications',notificationController.getAllNotifications)
-
+router.get('/getInfoNotification/:notificationId',notificationController.getInfoNotification)
 export default router
