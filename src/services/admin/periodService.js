@@ -148,7 +148,7 @@ export const periodService = {
                 page: Number(page),
                 limit: limit,
                 total: totalPeriods,
-                totalPage: Math.ceil(totalPeriods/limit)
+                totalPages: Math.ceil(totalPeriods/limit)
             }
         }
     },
