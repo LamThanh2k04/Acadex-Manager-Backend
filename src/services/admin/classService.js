@@ -259,7 +259,7 @@ export const classService = {
                 page: Number(page),
                 limit: limit,
                 total: totalClasses,
-                totalPage: Math.ceil(totalClasses / limit)
+                totalPages: Math.ceil(totalClasses / limit)
             }
         }
 
