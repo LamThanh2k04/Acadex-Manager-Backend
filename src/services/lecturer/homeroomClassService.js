@@ -86,7 +86,7 @@ export const homeroomClassService = {
                 page: Number(page),
                 limit: limit,
                 total: totalStudents,
-                totalPage: Math.ceil(totalStudents / limit)
+                totalPages: Math.ceil(totalStudents / limit)
             }
         }
     }

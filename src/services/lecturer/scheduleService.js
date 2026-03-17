@@ -2,7 +2,7 @@ import { NotFoundException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
 
 export const scheduleService = {
-    getAllScheduleLecturer: async (lecturerUserId, date,) => {
+    getAllScheduleLecturer: async (lecturerUserId, date) => {
 
         const lecturer = await prisma.lecturer.findUnique({
             where: { userId: Number(lecturerUserId) },

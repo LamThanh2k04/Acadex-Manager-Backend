@@ -25,9 +25,7 @@ export const scheduleService = {
         weekEnd.setDate(weekStart.getDate() + 6)
         weekEnd.setHours(23, 59, 59, 999)
 
-        // =============================
-        // 🎯 2️⃣ QUERY
-        // =============================
+      
         const enrollments = await prisma.enrollment.findMany({
             where: {
                 studentId: student.id,

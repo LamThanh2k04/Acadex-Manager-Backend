@@ -7,9 +7,6 @@ const openai = new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
 });
 
-// =======================
-// SYSTEM PROMPT
-// =======================
 const SYSTEM_PROMPT = `
 Bạn là trợ lý ảo cho hệ thống quản lý sinh viên.
 
@@ -48,7 +45,7 @@ export const aiService = {
     aiMessage: async (user, data) => {
         const { ask } = data;
 
-        // 🔐 Kiểm tra role
+       
         if (!user || user.role !== "STUDENT") {
             return {
                 data: {
@@ -58,7 +55,7 @@ export const aiService = {
             };
         }
 
-        // 🔎 Lấy student
+      
         const student = await prisma.student.findUnique({
             where: { userId: user.id }
         });
@@ -72,7 +69,7 @@ export const aiService = {
             };
         }
 
-        // 🤖 Gọi AI phân tích tiếng Việt
+        
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             temperature: 0,
@@ -119,16 +116,16 @@ export const aiService = {
 
             if (aiResult.date) {
 
-                // 🔥 Parse date an toàn (tránh lệch timezone)
+                
                 const queryDate = new Date(aiResult.date + "T00:00:00");
 
-                // JS: 0=CN,1=T2,...6=T7
+                
                 const jsDay = queryDate.getDay();
 
-                // 🎯 Map sang DB (2→8)
+                
                 const dbDay = jsDay === 0 ? 8 : jsDay + 1;
 
-                // Tạo range nguyên ngày
+                
                 const startOfDay = new Date(queryDate);
                 startOfDay.setHours(0, 0, 0, 0);
 
@@ -176,9 +173,7 @@ export const aiService = {
                 }
             };
         }
-        // =========================
-        // 📝 LỊCH THI
-        // =========================
+       
         if (intent === "exam") {
 
             let examCondition = {
@@ -245,9 +240,7 @@ export const aiService = {
             };
         }
 
-        // =========================
-        // 💰 HỌC PHÍ
-        // =========================
+      
         if (intent === "tuition") {
 
             const enrollments = await prisma.enrollment.findMany({
@@ -314,9 +307,7 @@ export const aiService = {
             };
         }
 
-        // =========================
-        // 💳 HƯỚNG DẪN ĐÓNG HỌC PHÍ
-        // =========================
+       
         if (intent === "tuition_guide") {
             return {
                 data: {
@@ -332,9 +323,7 @@ Bạn có thể đóng học phí bằng:
             };
         }
 
-        // =========================
-        // 📊 ĐIỂM
-        // =========================
+     
         if (intent === "grade") {
             const grades = await prisma.grade.findMany({
                 where: {
@@ -383,9 +372,6 @@ Bạn có thể đóng học phí bằng:
             };
         }
 
-        // =========================
-        // 👤 THÔNG TIN CÁ NHÂN
-        // =========================
         if (intent === "profile") {
             const profile = await prisma.student.findUnique({
                 where: { id: student.id },
@@ -411,9 +397,7 @@ Thông tin của bạn:
             };
         }
 
-        // =========================
-        // ❓ MẶC ĐỊNH
-        // =========================
+   
         return {
             data: {
                 text: "Xin lỗi, mình chưa hiểu câu hỏi của bạn.",

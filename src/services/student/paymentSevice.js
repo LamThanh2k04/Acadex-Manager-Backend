@@ -63,9 +63,6 @@ export const paymentSecvice = {
 
         const { enrollmentIds } = data
 
-        // ===============================
-        // 1️⃣ Validate input
-        // ===============================
         if (!Array.isArray(enrollmentIds) || enrollmentIds.length === 0) {
             throw new BadrequestException("enrollmentIds phải là mảng và không được rỗng")
         }
@@ -78,9 +75,6 @@ export const paymentSecvice = {
             throw new NotFoundException("Không tìm thấy sinh viên")
         }
 
-        // ===============================
-        // 2️⃣ Lấy enrollment hợp lệ
-        // ===============================
         const enrollments = await prisma.enrollment.findMany({
             where: {
                 id: { in: enrollmentIds.map(Number) },
@@ -95,20 +89,15 @@ export const paymentSecvice = {
 
         const enrollmentIdList = enrollments.map(e => e.id)
 
-        // ===============================
-        // 3️⃣ Tính tổng tiền
-        // ===============================
+
         const totalAmount = enrollments.reduce(
             (sum, e) => sum + e.fee,
             0
         )
 
-        // ===============================
-        // 4️⃣ Transaction xử lý payment
-        // ===============================
+
         const payment = await prisma.$transaction(async (tx) => {
 
-            // 🔥 HỦY TOÀN BỘ PENDING CŨ LIÊN QUAN
             await tx.payment.updateMany({
                 where: {
                     status: "PENDING",
@@ -123,7 +112,7 @@ export const paymentSecvice = {
                 }
             })
 
-            // 🔥 TẠO PAYMENT MỚI
+          
             const newPayment = await tx.payment.create({
                 data: {
                     amount: totalAmount,
@@ -141,9 +130,7 @@ export const paymentSecvice = {
             return newPayment
         })
 
-        // ===============================
-        // 5️⃣ Tạo link VNPay
-        // ===============================
+   
         const paymentUrl = await vnpay.buildPaymentUrl({
             vnp_Amount: payment.amount,
             vnp_IpAddr: "127.0.0.1",
@@ -160,7 +147,7 @@ export const paymentSecvice = {
         const paymentId = Number(query.vnp_TxnRef)
 
         if (query.vnp_ResponseCode === "00") {
-            // Thành công
+           
             await prisma.payment.update({
                 where: { id: paymentId },
                 data: {
@@ -183,7 +170,7 @@ export const paymentSecvice = {
             })
             return "Thanh toán thành công"
         } else {
-            // Thất bại hoặc hủy
+            
             await prisma.payment.update({
                 where: { id: paymentId },
                 data: {

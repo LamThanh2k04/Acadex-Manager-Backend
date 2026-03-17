@@ -164,7 +164,6 @@ export const courseSectionSecvice = {
                 midterm: getScore("MIDTERM"),
                 final: getScore("FINAL"),
 
-                // ✅ sửa ở đây
                 totalScore: enrollment.grades?.totalScore ?? null
             }
         })
@@ -174,8 +173,8 @@ export const courseSectionSecvice = {
             pagination: {
                 page: Number(page),
                 limit: limit,
-                totalStudent: totalStudent,
-                total: Math.ceil(totalStudent / limit)
+                total: totalStudent,
+                totalPages: Math.ceil(totalStudent / limit)
             }
         }
     },
@@ -260,8 +259,8 @@ export const courseSectionSecvice = {
             pagination: {
                 page: Number(page),
                 limit: limit,
-                totalStudent: totalCourseSections,
-                total: Math.ceil(totalCourseSections / limit)
+                total: totalCourseSections,
+                totalPages: Math.ceil(totalCourseSections / limit)
             }
         }
     }

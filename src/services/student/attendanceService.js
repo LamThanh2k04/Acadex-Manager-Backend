@@ -6,9 +6,7 @@ export const attendanceService = {
         const { sessionId, code } = data
         const now = new Date()
 
-        // ==============================
-        // 1. Tìm sinh viên
-        // ==============================
+
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) }
         })
@@ -17,9 +15,7 @@ export const attendanceService = {
             throw new NotFoundException("Không tìm thấy sinh viên")
         }
 
-        // ==============================
-        // 2. Tìm buổi điểm danh
-        // ==============================
+ 
         const session = await prisma.attendanceSession.findUnique({
             where: { id: Number(sessionId) }
         })
@@ -28,9 +24,6 @@ export const attendanceService = {
             throw new NotFoundException("Buổi điểm danh không tồn tại hoặc đã kết thúc")
         }
 
-        // ==============================
-        // 3. Check mã hợp lệ
-        // ==============================
         if (!session.currentCode || session.currentCode !== code) {
             throw new BadrequestException("Mã điểm danh không đúng")
         }
@@ -39,9 +32,7 @@ export const attendanceService = {
             throw new BadrequestException("Mã điểm danh đã hết hạn")
         }
 
-        // ==============================
-        // 4. Check đã điểm danh chưa
-        // ==============================
+ 
         const existed = await prisma.attendance.findFirst({
             where: {
                 sessionId: session.id,
@@ -53,9 +44,7 @@ export const attendanceService = {
             throw new BadrequestException("Bạn đã điểm danh rồi")
         }
 
-        // ==============================
-        // 5. Lưu điểm danh
-        // ==============================
+
         const attendance = await prisma.attendance.create({
             data: {
                 sessionId: session.id,
@@ -65,9 +54,7 @@ export const attendanceService = {
             }
         })
 
-        // ==============================
-        // 6. Realtime báo cho giảng viên
-        // ==============================
+
         getIO()
             .to(`attendance_${session.id}`)
             .emit("student-checked-in", {
@@ -83,7 +70,7 @@ export const attendanceService = {
             return jsDay === 0 ? 8 : jsDay + 1
         }
 
-        // 1. Tìm sinh viên
+   
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) }
         })
@@ -92,7 +79,7 @@ export const attendanceService = {
         const targetDate = new Date(date)
         const dayOfWeek = getDayOfWeek(date)
 
-        // 2. Lấy lịch học SV đã đăng ký
+   
         const schedules = await prisma.schedule.findMany({
             where: {
                 dayOfWeek,

@@ -6,12 +6,14 @@ export const gradesResultsService = {
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) },
         })
+
         if (!student) {
             throw new NotFoundException("Không tìm thấy học sinh này")
         }
+
         const enrollments = await prisma.enrollment.findMany({
             where: {
-                studentId: student.id,  // 👈 sửa luôn cái này (mình nói bên dưới)
+                studentId: student.id,
                 isPaid: true,
                 status: "REGISTERED"
             },
@@ -33,7 +35,7 @@ export const gradesResultsService = {
                         }
                     }
                 },
-                grades: {   // 👈 đổi từ grades thành grade
+                grades: {
                     select: {
                         totalScore: true,
                         gpaScale4: true,
@@ -52,10 +54,9 @@ export const gradesResultsService = {
             }
         })
 
-        const results = enrollments.map(e => {
-           const grade = e.grades
 
-            // chuyển component thành object dễ truy cập
+        const flatResults = enrollments.map(e => {
+            const grade = e.grades
             const componentMap = {}
 
             grade?.components.forEach(c => {
@@ -84,8 +85,55 @@ export const gradesResultsService = {
             }
         })
 
-        return {
-            studyResults: results
-        }
+
+        const semesterMap = {}
+
+        flatResults.forEach(item => {
+            const key = `${item.semester.name}_${item.semester.academicYear}`
+
+            if (!semesterMap[key]) {
+                semesterMap[key] = {
+                    semester: item.semester,
+                    subjects: []
+                }
+            }
+
+            semesterMap[key].subjects.push({
+                sectionCode: item.sectionCode,
+                subjectName: item.subjectName,
+                credits: item.credits,
+
+                midterm: item.midterm,
+                final: item.final,
+                theory1: item.theory1,
+                theory2: item.theory2,
+                practice1: item.practice1,
+                practice2: item.practice2,
+                practice3: item.practice3,
+
+                totalScore: item.totalScore,
+                gpaScale4: item.gpaScale4,
+                letterGrade: item.letterGrade,
+                classification: item.classification,
+                isPassed: item.isPassed
+            })
+        })
+
+
+        let groupedResults = Object.values(semesterMap)
+
+
+        groupedResults.sort((a, b) => {
+
+            if (a.semester.academicYear !== b.semester.academicYear) {
+                return a.semester.academicYear.localeCompare(b.semester.academicYear)
+            }
+
+
+            const getSemesterNumber = name => Number(name.replace(/\D/g, ''))
+            return getSemesterNumber(a.semester.name) - getSemesterNumber(b.semester.name)
+        })
+
+        return { studyResults: groupedResults }
     }
 }
