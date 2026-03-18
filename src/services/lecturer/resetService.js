@@ -2,13 +2,12 @@ import { BadrequestException, NotFoundException } from "../../common/helpers/exc
 import prisma from "../../common/prisma/initPrisma.js"
 import bcrypt from 'bcrypt'
 import validatePassword from "../../utils/validatePassword.js"
+import validateMissingFields from "../../utils/validateFields.js"
 export const resetService = {
     resetPassword: async (lecturerId, data) => {
+        validateMissingFields(data, ['oldPassword', 'newPassword', 'confirmPassword'])
         const { oldPassword, newPassword, confirmPassword } = data
         validatePassword(newPassword)
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            throw new BadrequestException("Thiếu thông tin mật khẩu");
-        }
         if (newPassword !== confirmPassword) {
             throw new BadrequestException('Mật khẩu mới không giống mật khẩu xác nhận')
         }
@@ -25,7 +24,7 @@ export const resetService = {
         }
         const hashPassword = await bcrypt.hash(newPassword, 10)
 
-       await prisma.user.update({
+        await prisma.user.update({
             where: { id: Number(lecturerId) },
             data: {
                 password: hashPassword
