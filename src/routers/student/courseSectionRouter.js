@@ -10,4 +10,5 @@ router.get('/getScheduleByCourseSection/:courseSectionId',courseSectionControlle
 router.post('/registerCourseSection',courseSectionController.registerCourseSection)
 router.post('/cancelCourseSection/:enrollmentId',courseSectionController.cancelCourseSection)
 router.get('/getAllEnrollmentCourseSection',courseSectionController.getAllEnrollmentCourseSection)
+router.get('/getAllSchedulesByCourseSectionRegister',courseSectionController.getAllSchedulesByCourseSectionRegister)
 export default router

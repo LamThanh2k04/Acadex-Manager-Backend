@@ -80,4 +80,15 @@ export const courseSectionController = {
             next(err)
         }
     },
+    getAllSchedulesByCourseSectionRegister: async (req,res,next) => {
+        try {
+          const courseSectionId = req.params.courseSectionId
+          const data = await courseSectionSecvice.getAllSchedulesByCourseSectionRegister(courseSectionId)
+          const response = responseSuccess(data,'Lấy tất cả lịch của học phần đã đăng kí thành công')
+          res.status(response.status).json(response)
+        } catch (err) {
+            console.error('Lấy tất cả lịch của học phần đã đăng kí thất bại', err)
+            next(err)
+        }
+    }
 }

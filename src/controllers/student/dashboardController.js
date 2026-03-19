@@ -41,7 +41,7 @@ export const dashboardController = {
             const studentId = req.user.id
             const semesterId = req.params.semesterId
             const data = await dashboardService.getFinalScoresForChart(studentId, semesterId)
-            const response = responseSuccess(data, 'Lấy danh sách học các môn học đã có điểm thành công thành công')
+            const response = responseSuccess(data, 'Lấy danh sách học các môn học đã có điểm thành công')
             res.status(response.status).json(response)
         } catch (err) {
             console.error('Lấy danh sách học các môn học đã có điểm thất bại', err)
@@ -52,10 +52,10 @@ export const dashboardController = {
         try {
             const studentId = req.user.id
             const data = await dashboardService.getResultsIsStudyCredits(studentId)
-            const response = responseSuccess(data, 'Lấy danh sách tổng tín chỉ đã học thành công thành công')
+            const response = responseSuccess(data, 'Lấy tổng tín chỉ đã học thành công')
             res.status(response.status).json(response)
         } catch (err) {
-            console.error('Lấy danh sách tổng tín chỉ đã học thất bại', err)
+            console.error('Lấy tổng tín chỉ đã học thất bại', err)
             next(err)
         }
     },

@@ -123,7 +123,6 @@ export const courseSectionSecvice = {
         }
     },
     getScheduleByCourseSection: async (courseSectionId) => {
-
         const schedules = await prisma.schedule.findMany({
             where: { courseSectionId: Number(courseSectionId) },
             orderBy: [
@@ -154,6 +153,7 @@ export const courseSectionSecvice = {
                 },
                 courseSection: {
                     select: {
+                        id : true,
                         enrollments: {
                             where: {
                                 status: 'REGISTERED'
@@ -184,7 +184,7 @@ export const courseSectionSecvice = {
         const enrollments = schedules[0].courseSection.enrollments
         const totalEnrollment = enrollments.length
 
-        // ===== ĐẾM SỐ LƯỢNG THEO GROUP =====
+       
 
         const practiceCountMap = {}
 
@@ -193,7 +193,7 @@ export const courseSectionSecvice = {
             practiceCountMap[key] = (practiceCountMap[key] || 0) + 1
         })
 
-        // ===== CHIA THEO TYPE =====
+       
 
         const theorySchedules = schedules.filter(s => s.type === "THEORY")
         const onlineSchedules = schedules.filter(s => s.type === "ONLINE")
@@ -215,7 +215,7 @@ export const courseSectionSecvice = {
             meetingLink: schedule.meetingLink
         })
 
-        // ===== THEORY (1 block duy nhất) =====
+       
 
         const theory = theorySchedules.length
             ? [{
@@ -226,7 +226,7 @@ export const courseSectionSecvice = {
             }]
             : []
 
-        // ===== ONLINE (1 block duy nhất) =====
+     
 
         const online = onlineSchedules.length
             ? [{
@@ -237,7 +237,7 @@ export const courseSectionSecvice = {
             }]
             : []
 
-        // ===== PRACTICE =====
+       
 
         const practiceMap = {}
 
@@ -248,7 +248,7 @@ export const courseSectionSecvice = {
 
             if (!practiceMap[groupKey]) {
                 practiceMap[groupKey] = {
-                    group: schedule.practiceGroup, // null nếu không chia
+                    group: schedule.practiceGroup, 
                     slot: `${current}/${schedule.maxStudents}`,
                     lecturer,
                     plannedClass,
@@ -456,6 +456,7 @@ export const courseSectionSecvice = {
                 id: true,
                 courseSection: {
                     select: {
+                        id : true,
                         sectionCode: true,
                         plannedClass: {
                             select: {
@@ -501,5 +502,45 @@ export const courseSectionSecvice = {
             totalEnrollment
         }
     },
-
+    getAllSchedulesByCourseSectionRegister: async (courseSectionId) => {
+        const courseSection = await prisma.enrollment.findUnique({
+            where : {
+               courseSectionId : Number(courseSectionId),
+               status : 'REGISTERED'
+            }
+        })
+        if(!courseSection) {
+            throw new NotFoundException('Không tìm thấy học phần đã đăng kí này')
+        }
+        const schedules = await prisma.schedule.findMany({
+            where : {
+                courseSectionId : Number(courseSectionId)
+            },
+            select : {
+                id : true,
+                dayOfWeek : true,
+                startTimeMinutes : true,
+                endTimeMinutes : true,
+                startDate : true,
+                endDate : true,
+                type : true,
+                practiceGroup : true,
+                meetingLink : true,
+                isActive : true,
+                room : {
+                    select : {
+                        name : true,
+                        building : {
+                            select : {
+                                name : true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+        return {
+            schedules
+        }
+    }
 }

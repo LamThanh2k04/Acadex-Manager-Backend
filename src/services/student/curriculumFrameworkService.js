@@ -96,6 +96,7 @@ export const curriculumFrameworkService = {
                 type: true,
                 subject: {
                     select: {
+                        id: true,
                         code: true,
                         name: true,
                         credits: true,
@@ -120,9 +121,10 @@ export const curriculumFrameworkService = {
                 grades: {
                     where: { isActive: true },
                     select: {
-                        isPassed: true
+                        isPassed: true,
+                        isActive : true 
                     },
-                    take: 1
+                    // take: 1
                 }
             }
         })
@@ -144,15 +146,16 @@ export const curriculumFrameworkService = {
             const enrollment = enrollmentMap.get(s.subject.id)
 
             let enrollmentStatus = "NOT_REGISTERED"
-            let isPassed  = null
+            let isPassed = null
+
             if (enrollment) {
                 if (enrollment.status === "REGISTERED") {
                     enrollmentStatus = "REGISTERED"
                 }
 
-                const grade = enrollment.grades[0]
+                const grade = enrollment.grades
 
-                if (grade) {
+                if (grade && grade.isActive) {
                     isPassed = grade.isPassed
                 }
             }
