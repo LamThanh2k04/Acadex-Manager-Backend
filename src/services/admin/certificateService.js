@@ -102,7 +102,7 @@ export const certificateService = {
                 page : Number(page),
                 limit : limit,
                 total : totalCertificates,
-                totalPage : Math.ceil(totalCertificates/limit)
+                totalPages : Math.ceil(totalCertificates/limit)
             }
         }
     },
