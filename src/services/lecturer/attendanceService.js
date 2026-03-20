@@ -266,7 +266,11 @@ export const attendanceService = {
         return sendSession
     },
     updateAttendanceStatus: async (attendanceId, data) => {
+        validateMissingFields(data,['status'])
         const { status } = data
+        if(typeof status !== 'string' || status.trim() === '') {
+            throw new BadrequestException('Trạng thái không hợp lệ')
+        }
         const attendance = await prisma.attendance.findUnique({
             where: { id: Number(attendanceId) }
         })
