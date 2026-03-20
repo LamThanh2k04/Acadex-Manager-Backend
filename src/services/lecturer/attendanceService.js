@@ -2,6 +2,7 @@ import { BadrequestException, NotFoundException } from "../../common/helpers/exc
 import generateAttendanceCode from "../../common/helpers/generateAttendanceCode.js"
 import prisma from "../../common/prisma/initPrisma.js"
 import { getIO } from "../../socket/socket.js"
+import validateMissingFields from "../../utils/validateFields.js"
 
 const rotationMap = new Map()
 const startRotateCode = (sessionId) => {
@@ -217,7 +218,11 @@ export const attendanceService = {
         getIO().to(`attendance_${sessionId}`).emit("attendance-ended")
     },
     sendAttendanceReport: async (sessionId, data) => {
+        validateMissingFields(data,['note'])
         const { note } = data
+        if(typeof note !== 'string' || note.trim() === '') {
+            throw new BadrequestException('Ghi chú không hợp lệ')
+        }
         const session = await prisma.attendanceSession.findUnique({
             where: { id: Number(sessionId) },
             include: { attendances: true }
