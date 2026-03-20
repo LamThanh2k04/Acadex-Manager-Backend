@@ -2,6 +2,32 @@ import { NotFoundException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
 
 export const dashboardService = {
+    getAllCourseSectionLecturerSimple : async (lecturerId) => {
+        const lecturer = await prisma.lecturer.findUnique({
+            where: { userId: lecturerId }
+        })
+        if (!lecturer) {
+            throw new NotFoundException("Không tìm thấy giảng viên này")
+        }
+        const courseSection = await prisma.courseSection.findMany({
+            where : {
+                lecturerId : lecturer.id
+            },
+            select : {
+                id : true,
+                sectionCode : true,
+                subject : {
+                    select : {
+                        id : true,
+                        name : true
+                    }
+                }
+            }
+        })
+        return {
+            courseSection
+        }
+    },
     getOverView: async (lecturerUserId) => {
 
         const lecturer = await prisma.lecturer.findUnique({

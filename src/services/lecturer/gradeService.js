@@ -22,7 +22,7 @@ export const gradeService = {
         const studentId = enrollment.studentId
         let grade = enrollment.grades
 
-        // 1️⃣ Nếu chưa có grade → tạo mới
+     
         if (!grade) {
           grade = await tx.grade.create({
             data: {
@@ -33,7 +33,6 @@ export const gradeService = {
           })
         }
 
-        // 2️⃣ Upsert component
         for (const [type, score] of Object.entries(scores)) {
 
           if (score === null || score === undefined) continue
@@ -54,9 +53,7 @@ export const gradeService = {
           })
         }
 
-        // ===============================
-        // 3️⃣ Lấy lại component
-        // ===============================
+ 
 
         const components = await tx.gradeComponent.findMany({
           where: { gradeId: grade.id }
@@ -70,13 +67,11 @@ export const gradeService = {
 
         let isEligibleForExam = midterm !== null && midterm >= 1
 
-        // ===============================
-        // 🎯 CASE 1: Chỉ cập nhật giữa kỳ
-        // ===============================
+ 
 
         if (!finalExam && finalExam !== 0) {
 
-          // Nếu chỉ mới có midterm
+       
           await tx.grade.update({
             where: { id: grade.id },
             data: {
@@ -86,12 +81,10 @@ export const gradeService = {
             }
           })
 
-          continue // bỏ qua phần tính total
+          continue
         }
 
-        // ===============================
-        // 🎯 CASE 2: Có FINAL → mới tính điểm
-        // ===============================
+    
 
         let totalScore = 0
         let gpaScale4 = 0
@@ -101,12 +94,11 @@ export const gradeService = {
 
         if (!isEligibleForExam) {
 
-          // Không đủ điều kiện thi
           totalScore = 0
 
         } else {
 
-          // Tính trung bình 2 cột
+        
           totalScore = (midterm + finalExam) / 2
 
           if (totalScore >= 8.5) {
@@ -132,7 +124,7 @@ export const gradeService = {
           }
         }
 
-        // Update full grade khi có FINAL
+      
         await tx.grade.update({
           where: { id: grade.id },
           data: {

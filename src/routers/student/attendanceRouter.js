@@ -3,7 +3,7 @@ import { attendanceController } from '../../controllers/student/attendanceContro
 
 const router = express.Router()
 
-router.get('/studentCheckIn',attendanceController.studentCheckIn)
+router.post('/studentCheckIn',attendanceController.studentCheckIn)
 router.get('/getSchedulesStudent',attendanceController.getSchedulesStudent)
 router.get('/getAllSemestersSimple',attendanceController.getAllSemestersSimple)
 router.get('/getAbsentBySemester/:semesterId',attendanceController.getAbsentBySemester)

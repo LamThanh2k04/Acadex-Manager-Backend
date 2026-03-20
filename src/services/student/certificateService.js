@@ -16,7 +16,7 @@ export const certificateService = {
         }
 
         if (!student.program) {
-            throw new BadRequestException("Sinh viên chưa có chương trình đào tạo")
+            throw new BadrequestException("Sinh viên chưa có chương trình đào tạo")
         }
 
         const certificates = await prisma.programCertificate.findMany({
@@ -81,10 +81,10 @@ export const certificateService = {
                 cert => cert.templateId === template.id && cert.status === 'ISSUED'
             )
             return {
-                student,
+                // student,
                 name: template.name,
                 description: template.description || template.name,
-                submit: studentCert ? 'Đã nộp' : '',
+                submit: studentCert ? true : false,
                 status: studentCert
                     ? (studentCert.status === "ISSUED" ? "Hoàn tất" : "Chưa hoàn tất")
                     : "Chưa hoàn tất"
@@ -94,65 +94,65 @@ export const certificateService = {
             result
         }
     },
-   submitCertificate: async (studentId, imageCertificate, data) => {
-    const { templateId, issueDate, description } = data
+    submitCertificate: async (studentId, imageCertificate, data) => {
+        const { templateId, issueDate, description } = data
 
-    const student = await prisma.student.findUnique({
-        where: { userId: Number(studentId) }
-    })
+        const student = await prisma.student.findUnique({
+            where: { userId: Number(studentId) }
+        })
 
-    if (!student) {
-        throw new NotFoundException('Không tìm thấy sinh viên')
-    }
-
-    const template = await prisma.certificateTemplate.findUnique({
-        where: { id: Number(templateId) }
-    })
-
-    if (!template) {
-        throw new NotFoundException("Không tìm thấy chứng chỉ")
-    }
-
-    // Kiểm tra có đơn đang PENDING không
-    const pendingRequest = await prisma.certificate.findFirst({
-        where: {
-            studentId: student.id,
-            templateId: Number(templateId),
-            status: "PENDING"
+        if (!student) {
+            throw new NotFoundException('Không tìm thấy sinh viên')
         }
-    })
 
-    if (pendingRequest) {
-        throw new BadrequestException("Yêu cầu đang chờ duyệt")
-    }
+        const template = await prisma.certificateTemplate.findUnique({
+            where: { id: Number(templateId) }
+        })
 
-    // Kiểm tra đã được APPROVED chưa
-    const approved = await prisma.certificate.findFirst({
-        where: {
-            studentId: student.id,
-            templateId: Number(templateId),
-            status: "ISSUED"
+        if (!template) {
+            throw new NotFoundException("Không tìm thấy chứng chỉ")
         }
-    })
 
-    if (approved) {
-        throw new BadrequestException("Chứng chỉ đã được duyệt")
-    }
+        // Kiểm tra có đơn đang PENDING không
+        const pendingRequest = await prisma.certificate.findFirst({
+            where: {
+                studentId: student.id,
+                templateId: Number(templateId),
+                status: "PENDING"
+            }
+        })
 
-    const submitCertificate =  await prisma.certificate.create({
-        data: {
-            fileUrl: imageCertificate ?? null,
-            studentId: student.id,
-            templateId: Number(templateId),
-            issueDate: issueDate ? new Date(issueDate) : null,
-            description: description ?? null,
-            status: "PENDING"
+        if (pendingRequest) {
+            throw new BadrequestException("Yêu cầu đang chờ duyệt")
         }
-    })
-    return {
-        submitCertificate
-    }
-},
+
+       
+        const approved = await prisma.certificate.findFirst({
+            where: {
+                studentId: student.id,
+                templateId: Number(templateId),
+                status: "ISSUED"
+            }
+        })
+
+        if (approved) {
+            throw new BadrequestException("Chứng chỉ đã được duyệt")
+        }
+
+        const submitCertificate = await prisma.certificate.create({
+            data: {
+                fileUrl: imageCertificate ?? null,
+                studentId: student.id,
+                templateId: Number(templateId),
+                issueDate: issueDate ? new Date(issueDate) : null,
+                description: description ?? null,
+                status: "PENDING"
+            }
+        })
+        return {
+            submitCertificate
+        }
+    },
     getAllCertificatesStudent: async (studentId) => {
         const student = await prisma.student.findUnique({
             where: { userId: studentId }

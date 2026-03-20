@@ -247,6 +247,13 @@ export const courseSectionSecvice = {
                         select: {
                             name: true
                         }
+                    },
+                    semester : {
+                        select : {
+                            id : true,
+                            name : true,
+                            academicYear : true
+                        }
                     }
                 }
             }),

@@ -1,4 +1,4 @@
-import { NotFoundException } from "../../common/helpers/exception.helper.js"
+import { BadrequestException, NotFoundException } from "../../common/helpers/exception.helper.js"
 import generateAttendanceCode from "../../common/helpers/generateAttendanceCode.js"
 import prisma from "../../common/prisma/initPrisma.js"
 import { getIO } from "../../socket/socket.js"
@@ -31,7 +31,7 @@ const startRotateCode = (sessionId) => {
 export const attendanceService = {
     getAllSchedulesLecturer: async (lecturerId, date) => {
         const getDayOfWeek = (date) => {
-            const jsDay = new Date(date).getDay() 
+            const jsDay = new Date(date).getDay()
             return jsDay === 0 ? 8 : jsDay + 1
         }
         const lecturer = await prisma.lecturer.findUnique({
@@ -95,9 +95,7 @@ export const attendanceService = {
             include: { attendances: true }
         })
 
-        // ==============================
-        // Map: studentId → { attendanceId, status }
-        // ==============================
+
         const attendanceMap = new Map()
 
         session?.attendances.forEach(a => {
@@ -107,9 +105,7 @@ export const attendanceService = {
             })
         })
 
-        // ==============================
-        // Lấy danh sách sinh viên
-        // ==============================
+
         const enrollments = await prisma.enrollment.findMany({
             where: {
                 courseSectionId: schedule.courseSectionId,
@@ -137,9 +133,7 @@ export const attendanceService = {
             }
         })
 
-        // ==============================
-        // Format trả về
-        // ==============================
+
         const students = enrollments.map(e => {
             const record = attendanceMap.get(e.student.id)
 
@@ -157,7 +151,7 @@ export const attendanceService = {
             students
         }
     },
-    startAttendance: async (lecturerId,data) => {
+    startAttendance: async (lecturerId, data) => {
         const { scheduleId } = data
         const now = new Date()
         const code = generateAttendanceCode()
@@ -224,7 +218,27 @@ export const attendanceService = {
     },
     sendAttendanceReport: async (sessionId, data) => {
         const { note } = data
-        const session = await prisma.attendanceSession.update({
+        const session = await prisma.attendanceSession.findUnique({
+            where: { id: Number(sessionId) },
+            include: { attendances: true }
+        })
+        if (!session) {
+            throw new NotFoundException('Không tìm thấy buổi điểm danh')
+        }
+
+
+        if (session.isTaking) {
+            throw new BadrequestException('Chưa thể gửi báo cáo khi buổi điểm danh chưa kết thúc')
+        }
+
+
+        if (session.attendances.length === 0) {
+            throw new BadrequestException('Chưa có dữ liệu điểm danh để gửi báo cáo')
+        }
+        if (session.sentToAdmin) {
+            throw new BadrequestException('Báo cáo đã được gửi trước đó')
+        }
+        const sendSession = await prisma.attendanceSession.update({
             where: { id: Number(sessionId) },
             data: {
                 note,
@@ -238,12 +252,13 @@ export const attendanceService = {
                                 user: true
                             }
                         }
+
                     }
                 }
             }
         })
 
-        return session
+        return sendSession
     },
     updateAttendanceStatus: async (attendanceId, data) => {
         const { status } = data

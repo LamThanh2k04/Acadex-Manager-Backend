@@ -72,9 +72,7 @@ export const scheduleService = {
         for (const item of enrollments) {
             const section = item.courseSection
 
-            // =============================
-            // 📚 LỊCH HỌC (TRONG TUẦN)
-            // =============================
+           
             for (const schedule of section.schedules) {
                 studySchedules.push({
                     subjectCode: section.subject.code,
@@ -91,9 +89,7 @@ export const scheduleService = {
                 })
             }
 
-            // =============================
-            // 📝 LỊCH THI (TRONG TUẦN)
-            // =============================
+      
             if (
                 section.exam &&
                 section.exam.examDate >= weekStart &&
@@ -112,9 +108,7 @@ export const scheduleService = {
             }
         }
 
-        // =============================
-        // 🎯 3️⃣ FILTER TYPE
-        // =============================
+    
         if (type === "STUDY") {
             return { weekStart, weekEnd, studySchedules }
         }

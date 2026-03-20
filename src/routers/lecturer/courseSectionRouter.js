@@ -3,7 +3,7 @@ import { courseSectionController } from '../../controllers/lecturer/courseSectio
 
 const router = express.Router()
 
-// router.get('/getAllSemestersSimple',courseSectionController.getAllSemestersSimple)
+router.get('/getAllSemestersSimple',courseSectionController.getAllSemestersSimple)
 // router.get('/getSubjectsBySemester/:semesterId',courseSectionController.getSubjectsBySemester)
 // router.get('/getAllCourseSectionsBySubject/:subjectId',courseSectionController.getAllCourseSectionsBySubject)
 router.get('/getAllStudentEnrollmentIsPaid/:courseSectionId',courseSectionController.getAllStudentEnrollmentIsPaid)

@@ -30,7 +30,6 @@ export const scheduleService = {
         const schedules = await prisma.schedule.findMany({
             where: {
                 isActive: true,
-                isPaused: true,
                 startDate: { lte: weekEnd },
                 endDate: { gte: weekStart },
                 courseSection: {

@@ -8,5 +8,5 @@ router.get('/getStudentsOfSchedule/:scheduleId',attendanceController.getStudents
 router.post('/startAttendance',attendanceController.startAttendance)
 router.post('/stopAttendance/:sessionId',attendanceController.stopAttendance)
 router.post('/sendAttendanceReport/:sessionId',attendanceController.sendAttendanceReport)
-router.post('/updateAttendanceStatus/:attendanceId',attendanceController.updateAttendanceStatus)
+router.put('/updateAttendanceStatus/:attendanceId',attendanceController.updateAttendanceStatus)
 export default router

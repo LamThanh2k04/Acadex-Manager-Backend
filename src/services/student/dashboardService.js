@@ -72,12 +72,12 @@ export const dashboardService = {
     getAllSemestersSimple: async () => {
         const semesters = await prisma.semester.findMany({
             where: { isActive: true },
-            select : {
-                id : true,
-                name : true,
-                academicYear : true
+            select: {
+                id: true,
+                name: true,
+                academicYear: true
             },
-            orderBy : {id : 'desc'}
+            orderBy: { id: 'desc' }
 
         })
         return {
@@ -117,7 +117,7 @@ export const dashboardService = {
             enrollments
         }
     },
-    getFinalScoresForChart: async (studentId, semesterId) => {
+    getTotalScoresForChart: async (studentId, semesterId) => {
 
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) }
@@ -147,10 +147,7 @@ export const dashboardService = {
                 },
                 grades: {
                     select: {
-                        components: {
-                            where: { type: "FINAL" },
-                            select: { score: true }
-                        }
+                        totalScore: true
                     }
                 }
             }
@@ -158,23 +155,18 @@ export const dashboardService = {
 
         const chartData = await Promise.all(
             enrollments.map(async (e) => {
-                const finalComponent = e.grades?.components?.[0]
-                const score = finalComponent?.score
+                const score = e.grades?.totalScore
 
                 if (score === null || score === undefined) return null
-                const avgResult = await prisma.gradeComponent.aggregate({
-                    _avg: { score: true },
+                const avgResult = await prisma.grade.aggregate({
+                    _avg: { totalScore: true },
                     where: {
-                        type: "FINAL",
-                        score: { not: null },
-                        grade: {
-                            enrollment: {
-                                courseSectionId: e.courseSectionId,
-                                isPaid: true,
-                                status: "REGISTERED",
-                                courseSection: {
-                                    semesterId: Number(semesterId)
-                                }
+                        enrollment: {
+                            courseSectionId: e.courseSectionId,
+                            isPaid: true,
+                            status: "REGISTERED",
+                            courseSection: {
+                                semesterId: Number(semesterId)
                             }
                         }
                     }
@@ -182,15 +174,15 @@ export const dashboardService = {
 
                 return {
                     subject: e.courseSection.subject.name,
-                    finalScore: score,
-                    classAverage: Number(avgResult._avg.score?.toFixed(2)) || 0
+                    totalScore: score,
+                    classAverage: Number(avgResult._avg.totalScore?.toFixed(2)) || 0
                 }
             })
         )
 
         return chartData.filter(Boolean)
     },
-     getResultsIsStudyCredits: async (studentId) => {
+    getResultsIsStudyCredits: async (studentId) => {
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) },
             include: { program: true }

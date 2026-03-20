@@ -142,7 +142,7 @@ export const attendanceService = {
             startTime: s.startTimeMinutes,
             endTime: s.endTimeMinutes,
 
-            // 🔥 Quan trọng cho nút điểm danh
+            
             sessionId: s.attendanceSessions[0]?.id ?? null,
             isTaking: s.attendanceSessions[0]?.isTaking ?? false
         }))

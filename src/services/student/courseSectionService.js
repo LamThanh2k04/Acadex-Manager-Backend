@@ -503,7 +503,7 @@ export const courseSectionSecvice = {
         }
     },
     getAllSchedulesByCourseSectionRegister: async (courseSectionId) => {
-        const courseSection = await prisma.enrollment.findUnique({
+        const courseSection = await prisma.enrollment.findFirst({
             where : {
                courseSectionId : Number(courseSectionId),
                status : 'REGISTERED'

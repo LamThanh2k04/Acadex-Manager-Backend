@@ -36,11 +36,11 @@ export const dashboardController = {
             next(err)
         }
     },
-    getFinalScoresForChart: async (req, res, next) => {
+    getTotalScoresForChart: async (req, res, next) => {
         try {
             const studentId = req.user.id
             const semesterId = req.params.semesterId
-            const data = await dashboardService.getFinalScoresForChart(studentId, semesterId)
+            const data = await dashboardService.getTotalScoresForChart(studentId, semesterId)
             const response = responseSuccess(data, 'Lấy danh sách học các môn học đã có điểm thành công')
             res.status(response.status).json(response)
         } catch (err) {

@@ -6,7 +6,7 @@ const router = express.Router()
 router.get('/getInfoStudent',dashboardController.getInfoStudent)
 router.get('/getAllSemestersSimple',dashboardController.getAllSemestersSimple)
 router.get('/getAllEnrollmentBySemester/:semesterId',dashboardController.getAllEnrollmentBySemester)
-router.get('/getFinalScoresForChart/:semesterId',dashboardController.getFinalScoresForChart)
+router.get('/getTotalScoresForChart/:semesterId',dashboardController.getTotalScoresForChart)
 router.get('/getResultsIsStudyCredits',dashboardController.getResultsIsStudyCredits)
 
 export default router

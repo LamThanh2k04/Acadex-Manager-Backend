@@ -6,4 +6,5 @@ const router = express.Router()
 router.get('/getOverView',dashboardController.getOverView)
 router.get('/getAttendanceRate',dashboardController.getAttendanceRate)
 router.get('/getAvgGradeByClass',dashboardController.getAvgGradeByClass)
+router.get('/getAllCourseSectionLecturerSimple',dashboardController.getAllCourseSectionLecturerSimple)
 export default router
