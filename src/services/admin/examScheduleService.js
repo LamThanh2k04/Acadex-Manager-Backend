@@ -352,6 +352,7 @@ export const examScheduleService = {
                     startMinute: true,
                     endMinute: true,
                     note: true,
+                    isActive : true,
                     courseSection: {
                         select: {
                             sectionCode: true,

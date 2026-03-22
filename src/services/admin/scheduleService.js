@@ -267,6 +267,7 @@ export const scheduleService = {
                     practiceGroup: true,
                     maxStudents: true,
                     meetingLink: true,
+                    isActive : true,
                     courseSection: {
                         select: {
                             semester: {
