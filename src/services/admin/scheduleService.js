@@ -118,12 +118,18 @@ export const scheduleService = {
                 throw new NotFoundException("Không tìm thấy phòng học")
             }
         }
+        if (
+            maxStudents !== undefined &&
+            (schedule.type === 'THEORY' || schedule.type === 'ONLINE')
+        ) {
+            throw new BadrequestException("Không được thay đổi maxStudents")
+        }
 
         if (maxStudents !== undefined) {
-
             const enrolledCount = await prisma.enrollment.count({
                 where: {
-                    courseSectionId : schedule.courseSectionId
+                    courseSectionId: schedule.courseSectionId,
+                    status: "REGISTERED" 
                 }
             })
 
@@ -267,13 +273,13 @@ export const scheduleService = {
                     practiceGroup: true,
                     maxStudents: true,
                     meetingLink: true,
-                    isActive : true,
+                    isActive: true,
                     courseSection: {
                         select: {
                             semester: {
-                                select : {
-                                    name : true,
-                                    academicYear : true
+                                select: {
+                                    name: true,
+                                    academicYear: true
                                 }
                             },
                             sectionCode: true,
@@ -295,7 +301,7 @@ export const scheduleService = {
                     },
                     room: {
                         select: {
-                            id : true,
+                            id: true,
                             name: true,
                             building: {
                                 select: {
