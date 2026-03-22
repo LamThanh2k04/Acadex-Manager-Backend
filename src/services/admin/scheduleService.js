@@ -123,7 +123,7 @@ export const scheduleService = {
 
             const enrolledCount = await prisma.enrollment.count({
                 where: {
-                    scheduleId: Number(scheduleId)
+                    courseSectionId : schedule.courseSectionId
                 }
             })
 
