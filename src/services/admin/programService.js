@@ -219,13 +219,15 @@ export const programService = {
                         id: true,
                         feePerCredit: true,
                         semesterOrder: true,
-                        subject: true
+                        subject: true,
+                        isActive : true
                     }
                 },
                 programCertificates: {
                     select: {
                         id : true,
-                        template: true
+                        template: true,
+                        isActive : true
                     }
                 }
             }
