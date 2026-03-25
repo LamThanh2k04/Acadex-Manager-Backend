@@ -103,7 +103,7 @@ export const programController = {
     updateCertificateToProgram: async (req, res, next) => {
         try {
             const programCertificateId = req.params.programCertificateId
-            const data = await programService.updateCertificateToProgram(programCertificateId, req.body)
+            const data = await programService.updateCertificateToProgram(programCertificateId)
             const response = responseSuccess(data, "Cập nhật chứng chỉ chương trình thành công")
             res.status(response.status).json(response)
         } catch (err) {

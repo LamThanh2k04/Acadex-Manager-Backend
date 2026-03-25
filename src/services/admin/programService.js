@@ -458,18 +458,10 @@ export const programService = {
             })
         })
     },
-    updateCertificateToProgram: async (programCertificateId, data) => {
-
+    updateCertificateToProgram: async (programCertificateId) => {
         if (!Number.isInteger(Number(programCertificateId))) {
             throw new BadrequestException("ProgramCertificate không hợp lệ")
         }
-
-        const { isActive } = data
-
-        if (typeof isActive !== "boolean") {
-            throw new BadrequestException("Trạng thái isActive không hợp lệ")
-        }
-
         const programCertificate = await prisma.programCertificate.findUnique({
             where: { id: Number(programCertificateId) }
         })
@@ -480,7 +472,9 @@ export const programService = {
 
         const updated = await prisma.programCertificate.update({
             where: { id: Number(programCertificateId) },
-            data: { isActive }
+            data: { 
+                isActive : !programCertificate.isActive
+             }
         })
 
         return updated
