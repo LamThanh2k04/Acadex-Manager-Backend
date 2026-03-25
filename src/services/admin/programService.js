@@ -371,7 +371,7 @@ export const programService = {
                     type,
                     isActive,
                     semesterOrder: Number(semesterOrder),
-                    feePerCredit: feePerCredit ?? null
+                    feePerCredit: Number(feePerCredit) ?? null
                 }
             })
 
