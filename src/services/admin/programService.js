@@ -219,6 +219,7 @@ export const programService = {
                         id: true,
                         feePerCredit: true,
                         semesterOrder: true,
+                        type : true,
                         subject: true,
                         isActive : true
                     }
