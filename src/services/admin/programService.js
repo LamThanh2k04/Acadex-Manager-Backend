@@ -106,8 +106,8 @@ export const programService = {
             where: { id: Number(programId) },
             data: {
                 name: name.trim(),
-                trainingLevel: Number(trainingLevel),
-                educationType: Number(educationType),
+                trainingLevel: trainingLevel,
+                educationType: educationType,
                 plannedEducationYear: Number(plannedEducationYear),
                 version: Number(version),
                 majorId: Number(majorId)
