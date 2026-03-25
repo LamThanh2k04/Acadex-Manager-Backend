@@ -28,6 +28,7 @@ export const notificationService = {
             select: {
                 id: true,
                 fullName: true,
+                avatar : true,
                 student: {
                     select: {
                         studentCode: true
