@@ -109,6 +109,7 @@ export const programService = {
                 trainingLevel: trainingLevel,
                 educationType: educationType,
                 plannedEducationYear: Number(plannedEducationYear),
+                feePerCredit : Number(feePerCredit),
                 version: Number(version),
                 majorId: Number(majorId)
             }
