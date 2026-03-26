@@ -16,4 +16,5 @@ router.put('/updateCertificateToProgram/:programCertificateId',programController
 router.get('/getSemesterOrdersPrgram/:programId',programController.getSemesterOrdersPrgram)
 router.get('/getSubjectsBySemesterOrder/:programId/semesterOrder/:semesterOrderId',programController.getSubjectsBySemesterOrder)
 router.get('/getAllSubjects/:programId',programController.getAllSubjects)
+router.get('/getAllCertificates/:programId',programController.getAllCertificates)
 export default router

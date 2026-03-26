@@ -557,6 +557,34 @@ export const programService = {
         return {
             subjects
         }
+    },
+    getAllCertificates : async (programId) => {
+         const program = await prisma.program.findUnique({
+            where : {
+                id : Number(programId)
+            }
+        })
+        if(!program) {
+            throw new NotFoundException('Không tồn tài chương trình này')
+        }
+        const certificates = await prisma.certificateTemplate.findMany({
+            where : {
+                programCertificates : {
+                    none : {
+                        programId : Number(programId)
+                    }
+                }
+            },
+            select : {
+               id : true,
+               name : true,
+               description : true
+            }
+        })
+        
+        return {
+            certificates
+        }
     }
 
 }

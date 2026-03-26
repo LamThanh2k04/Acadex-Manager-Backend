@@ -144,6 +144,17 @@ export const programController = {
             console.error("Lấy những môn học không có trong chương trình này thất bại", err)
             next(err)
         }
+    },
+    getAllCertificates: async (req, res, next) => {
+        try {
+            const programId = req.params.programId
+            const data = await programService.getAllCertificates(programId)
+            const response = responseSuccess(data, 'Lấy những chứng chỉ không có trong chương trình này thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy những chứng chỉ không có trong chương trình này thất bại", err)
+            next(err)
+        }
     }
 
 }
