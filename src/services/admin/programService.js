@@ -530,5 +530,33 @@ export const programService = {
             subjects
         }
     },
+    getAllSubjects: async (programId) => {
+        const program = await prisma.program.findUnique({
+            where : {
+                id : Number(programId)
+            }
+        })
+        if(!program) {
+            throw new NotFoundException('Không tồn tài chương trình này')
+        }
+        const subjects = await prisma.subject.findMany({
+            where : {
+                programSubjects : {
+                    none : {
+                        programId : Number(programId)
+                    }
+                }
+            },
+            select : {
+                id : true,
+                code : true,
+                name : true
+            }
+        })
+        
+        return {
+            subjects
+        }
+    }
 
 }

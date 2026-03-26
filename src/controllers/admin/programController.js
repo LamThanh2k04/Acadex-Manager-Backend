@@ -126,7 +126,7 @@ export const programController = {
         try {
             const programId = req.params.programId
             const semesterOrderId = req.params.semesterOrderId
-            const data = await programService.getSubjectsBySemesterOrder(programId,semesterOrderId)
+            const data = await programService.getSubjectsBySemesterOrder(programId, semesterOrderId)
             const response = responseSuccess(data, 'Lấy danh sách môn học theo học kì của chương trình này thành công')
             res.status(response.status).json(response)
         } catch (err) {
@@ -134,6 +134,16 @@ export const programController = {
             next(err)
         }
     },
-
+    getAllSubjects: async (req, res, next) => {
+        try {
+            const programId = req.params.programId
+            const data = await programService.getAllSubjects(programId)
+            const response = responseSuccess(data, 'Lấy những môn học không có trong chương trình này thành công')
+            res.status(response.status).json(response)
+        } catch (err) {
+            console.error("Lấy những môn học không có trong chương trình này thất bại", err)
+            next(err)
+        }
+    }
 
 }
