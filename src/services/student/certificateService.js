@@ -7,7 +7,8 @@ export const certificateService = {
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) },
             include: {
-                program: true
+                program: true,
+                certificates : true
             }
         })
 
@@ -19,7 +20,7 @@ export const certificateService = {
             throw new BadrequestException("Sinh viên chưa có chương trình đào tạo")
         }
 
-        const certificates = await prisma.programCertificate.findMany({
+        const programCertificates = await prisma.programCertificate.findMany({
             where: {
                 programId: student.program.id,
                 template: {
@@ -35,6 +36,10 @@ export const certificateService = {
                     }
                 }
             }
+        })
+        const studentCertificates = student.certificates.map((cer) => cer.templateId)
+        const certificates = programCertificates.filter((c) => {
+           return !studentCertificates.includes(c.template.id)
         })
 
         return {
@@ -113,7 +118,7 @@ export const certificateService = {
             throw new NotFoundException("Không tìm thấy chứng chỉ")
         }
 
-        // Kiểm tra có đơn đang PENDING không
+        
         const pendingRequest = await prisma.certificate.findFirst({
             where: {
                 studentId: student.id,
