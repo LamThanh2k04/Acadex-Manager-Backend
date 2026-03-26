@@ -4,7 +4,7 @@ import { upload } from '../../common/cloudinary/initCloudinary.js'
 
 const router = express.Router()
 
-router.get('/getAllCertificatesSimpleProgram',certificateController.getAllCertificatesSimpleProgram)
+router.get('/getAllCertificatesProgram',certificateController.getAllCertificatesProgram)
 router.get('/getCertificatesProgram',certificateController.getCertificatesProgram)
 router.post('/submitCertificate',upload.single('imageCertificate'),certificateController.submitCertificate)
 router.get('/getAllCertificatesStudent',certificateController.getAllCertificatesStudent)

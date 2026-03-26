@@ -2,10 +2,10 @@ import { responseSuccess } from "../../common/helpers/response.helper.js"
 import { certificateService } from "../../services/student/certificateService.js"
 
 export const certificateController = {
-    getAllCertificatesSimpleProgram: async (req, res, next) => {
+    getAllCertificatesProgram: async (req, res, next) => {
         try {
             const studentId = req.user.id
-            const data = await certificateService.getAllCertificatesSimpleProgram(studentId)
+            const data = await certificateService.getAllCertificatesProgram(studentId)
             const response = responseSuccess(data, "Lấy danh sách các chứng chỉ có trong chương trình thành công")
             res.status(response.status).json(response)
         } catch (err) {

@@ -1,8 +1,9 @@
 import { BadrequestException, NotFoundException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
+import validateMissingFields from "../../utils/validateFields.js"
 
 export const certificateService = {
-    getAllCertificatesSimpleProgram: async (studentId) => {
+    getAllCertificatesProgram: async (studentId) => {
 
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) },
@@ -100,8 +101,11 @@ export const certificateService = {
         }
     },
     submitCertificate: async (studentId, imageCertificate, data) => {
+        validateMissingFields(data,['templateId','issueDate'])
         const { templateId, issueDate, description } = data
-
+        if(!imageCertificate) {
+            throw new BadrequestException("Vui lòng tải lên ảnh chứng chỉ")
+        }
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) }
         })
