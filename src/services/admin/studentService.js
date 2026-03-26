@@ -387,9 +387,15 @@ export const studentService = {
                     student: {
                         select: {
                             studentCode: true,
+                            major: {
+                                select: {
+                                    name: true
+                                }
+                            },
                             user: {
                                 select: {
-                                    fullName: true
+                                    fullName: true,
+                                    avatar: true
                                 }
                             }
                         }
@@ -398,6 +404,7 @@ export const studentService = {
                         select: {
                             code: true,
                             name: true,
+                            description: true
                         }
                     }
                 }
@@ -428,16 +435,24 @@ export const studentService = {
                 student: {
                     select: {
                         studentCode: true,
+                        major: {
+                            select: {
+                                name: true
+                            }
+                        },
                         user: {
                             select: {
-                                fullName: true
+                                fullName: true,
+                                avatar: true
                             }
                         }
                     }
                 },
                 template: {
                     select: {
-                        name: true
+                        code: true,
+                        name: true,
+                        description: true
                     }
                 }
             }
@@ -490,7 +505,9 @@ export const studentService = {
                 note: note?.trim() || null
             }
         })
-        return rejectCertificate
+        return {
+            rejectCertificate
+        }
     },
     getStudentsTuitionStatus: async (semesterId, status, page) => {
         const limit = 10
@@ -511,8 +528,16 @@ export const studentService = {
             },
             select: {
                 studentCode: true,
+                major: {
+                    select: {
+                        name: true
+                    }
+                },
                 user: {
-                    select: { fullName: true }
+                    select: {
+                        fullName: true,
+                        avatar: true
+                    }
                 },
                 enrollments: {
                     where: {
@@ -590,13 +615,12 @@ export const studentService = {
 
                 let statusResult = "PAID"
 
-                if (sem.totalCourseFee === 0) {
-                    statusResult = "NO_COURSE"
-                } else if (remainingAmount > 0) {
+                if (remainingAmount > 0) {
                     statusResult = "UNPAID"
                 }
 
                 results.push({
+                    avatar : student.user.avatar,
                     studentCode: student.studentCode,
                     fullName: student.user.fullName,
                     semester: sem.semesterName,
