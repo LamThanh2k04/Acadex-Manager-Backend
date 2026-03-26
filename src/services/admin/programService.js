@@ -299,7 +299,7 @@ export const programService = {
                 subjectId: Number(subjectId),
                 semesterOrder: Number(semesterOrder),
                 type: type,
-                feePerCredit: feePerCredit ?? null
+                feePerCredit: Number(feePerCredit) ?? null
             }))
             await tx.programSubject.createMany({
                 data: insertData
