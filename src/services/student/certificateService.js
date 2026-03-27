@@ -38,7 +38,7 @@ export const certificateService = {
                 }
             }
         })
-        const studentCertificates = student.certificates.map((cer) => cer.templateId)
+        const studentCertificates = student.certificates.filter((cer) => cer.status === 'PENDING' || cer.status === 'ISSUED').map((cer) => cer.templateId)
         const certificates = programCertificates.filter((c) => {
            return !studentCertificates.includes(c.template.id)
         })
