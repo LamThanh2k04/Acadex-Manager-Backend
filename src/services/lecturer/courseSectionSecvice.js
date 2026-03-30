@@ -73,13 +73,21 @@ export const courseSectionSecvice = {
             courseSections
         }
     },
-    getAllStudentEnrollmentIsPaid: async (courseSectionId, search, page) => {
-
+    getAllStudentEnrollmentIsPaid: async (lecturerId, courseSectionId, search, page) => {
+        const lecturer = await prisma.lecturer.findUnique({
+            where: { userId: Number(lecturerId) }
+        })
+        if (!lecturer) {
+            throw new NotFoundException("Không tìm thấy giảng viên này")
+        }
         const limit = 10
         const skip = (Number(page) - 1) * limit
 
         const whereCondition = {
-            courseSectionId: Number(courseSectionId),
+            courseSection: {
+                id: Number(courseSectionId),
+                lecturerId: lecturer.id
+            },
             status: 'REGISTERED',
             isPaid: true,
             ...(search && {
@@ -125,7 +133,12 @@ export const courseSectionSecvice = {
                     },
                     courseSection: {
                         select: {
-                            sectionCode: true
+                            sectionCode: true,
+                            subject : {
+                                select : {
+                                    name :true
+                                }
+                            }
                         }
                     },
                     grades: {
@@ -152,6 +165,7 @@ export const courseSectionSecvice = {
             return {
                 enrollmentId: enrollment.id,
                 sectionCode: enrollment.courseSection.sectionCode,
+                subjectName: enrollment.courseSection.subject.name,
                 studentCode: enrollment.student.studentCode,
                 fullName: enrollment.student.user.fullName,
                 avatar: enrollment.student.user.avatar,
@@ -248,11 +262,11 @@ export const courseSectionSecvice = {
                             name: true
                         }
                     },
-                    semester : {
-                        select : {
-                            id : true,
-                            name : true,
-                            academicYear : true
+                    semester: {
+                        select: {
+                            id: true,
+                            name: true,
+                            academicYear: true
                         }
                     }
                 }

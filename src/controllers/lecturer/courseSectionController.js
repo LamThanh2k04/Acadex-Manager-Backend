@@ -41,7 +41,8 @@ export const courseSectionController = {
             const page = req.query.page || 1
             const search = req.query.search || ""
             const courseSectionId = req.params.courseSectionId
-            const data = await courseSectionSecvice.getAllStudentEnrollmentIsPaid(courseSectionId, search,page)
+             const lecturerId = req.user.id
+            const data = await courseSectionSecvice.getAllStudentEnrollmentIsPaid(lecturerId,courseSectionId, search,page)
             const response = responseSuccess(data, 'Lấy danh sách sinh viên học phần của môn học mà giảng viên này dạy trong học kì thực tế thành công')
             res.status(response.status).json(response)
         } catch (err) {
