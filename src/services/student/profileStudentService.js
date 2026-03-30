@@ -25,6 +25,8 @@ export const profileStudentService = {
                         admissionYear: true,
                         graduateYear: true,
                         status: true,
+                        gpa : true,
+                        creditsEarned : true,
                         class: {
                             select: {
                                 homeroomLecturer: {
