@@ -29,6 +29,7 @@ export const courseSectionSecvice = {
         const subjects = await prisma.courseSection.findMany({
             where: {
                 semesterId: Number(semesterId),
+                distinct: ['subjectId'],
                 subject: {
                     programSubjects: {
                         some: {
