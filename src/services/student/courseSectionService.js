@@ -10,7 +10,7 @@ export const courseSectionSecvice = {
                 name: true,
                 academicYear: true
             },
-            orderBy : {id : 'desc'}
+            orderBy: { id: 'desc' }
         })
         return {
             semesters
@@ -29,7 +29,6 @@ export const courseSectionSecvice = {
         const subjects = await prisma.courseSection.findMany({
             where: {
                 semesterId: Number(semesterId),
-                distinct: ['subjectId'],
                 subject: {
                     programSubjects: {
                         some: {
@@ -56,6 +55,7 @@ export const courseSectionSecvice = {
                     }
                 ]
             },
+            distinct: ['subjectId'],
             select: {
                 subject: {
                     select: {
@@ -154,7 +154,7 @@ export const courseSectionSecvice = {
                 },
                 courseSection: {
                     select: {
-                        id : true,
+                        id: true,
                         enrollments: {
                             where: {
                                 status: 'REGISTERED'
@@ -185,7 +185,7 @@ export const courseSectionSecvice = {
         const enrollments = schedules[0].courseSection.enrollments
         const totalEnrollment = enrollments.length
 
-       
+
 
         const practiceCountMap = {}
 
@@ -194,7 +194,7 @@ export const courseSectionSecvice = {
             practiceCountMap[key] = (practiceCountMap[key] || 0) + 1
         })
 
-       
+
 
         const theorySchedules = schedules.filter(s => s.type === "THEORY")
         const onlineSchedules = schedules.filter(s => s.type === "ONLINE")
@@ -216,7 +216,7 @@ export const courseSectionSecvice = {
             meetingLink: schedule.meetingLink
         })
 
-       
+
 
         const theory = theorySchedules.length
             ? [{
@@ -227,7 +227,7 @@ export const courseSectionSecvice = {
             }]
             : []
 
-     
+
 
         const online = onlineSchedules.length
             ? [{
@@ -238,7 +238,7 @@ export const courseSectionSecvice = {
             }]
             : []
 
-       
+
 
         const practiceMap = {}
 
@@ -249,7 +249,7 @@ export const courseSectionSecvice = {
 
             if (!practiceMap[groupKey]) {
                 practiceMap[groupKey] = {
-                    group: schedule.practiceGroup, 
+                    group: schedule.practiceGroup,
                     slot: `${current}/${schedule.maxStudents}`,
                     lecturer,
                     plannedClass,
@@ -457,7 +457,7 @@ export const courseSectionSecvice = {
                 id: true,
                 courseSection: {
                     select: {
-                        id : true,
+                        id: true,
                         sectionCode: true,
                         plannedClass: {
                             select: {
@@ -505,35 +505,35 @@ export const courseSectionSecvice = {
     },
     getAllSchedulesByCourseSectionRegister: async (courseSectionId) => {
         const courseSection = await prisma.enrollment.findFirst({
-            where : {
-               courseSectionId : Number(courseSectionId),
-               status : 'REGISTERED'
+            where: {
+                courseSectionId: Number(courseSectionId),
+                status: 'REGISTERED'
             }
         })
-        if(!courseSection) {
+        if (!courseSection) {
             throw new NotFoundException('Không tìm thấy học phần đã đăng kí này')
         }
         const schedules = await prisma.schedule.findMany({
-            where : {
-                courseSectionId : Number(courseSectionId)
+            where: {
+                courseSectionId: Number(courseSectionId)
             },
-            select : {
-                id : true,
-                dayOfWeek : true,
-                startTimeMinutes : true,
-                endTimeMinutes : true,
-                startDate : true,
-                endDate : true,
-                type : true,
-                practiceGroup : true,
-                meetingLink : true,
-                isActive : true,
-                room : {
-                    select : {
-                        name : true,
-                        building : {
-                            select : {
-                                name : true
+            select: {
+                id: true,
+                dayOfWeek: true,
+                startTimeMinutes: true,
+                endTimeMinutes: true,
+                startDate: true,
+                endDate: true,
+                type: true,
+                practiceGroup: true,
+                meetingLink: true,
+                isActive: true,
+                room: {
+                    select: {
+                        name: true,
+                        building: {
+                            select: {
+                                name: true
                             }
                         }
                     }
