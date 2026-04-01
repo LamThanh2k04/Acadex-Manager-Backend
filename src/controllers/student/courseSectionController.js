@@ -72,7 +72,8 @@ export const courseSectionController = {
     getAllEnrollmentCourseSection: async (req, res, next) => {
         try {
             const studentId = req.user.id
-            const data = await courseSectionSecvice.getAllEnrollmentCourseSection(studentId)
+            const semesterId = req.params.semesterId
+            const data = await courseSectionSecvice.getAllEnrollmentCourseSection(studentId, semesterId)
             const response = responseSuccess(data, "Lấy danh sách học phần đã đăng kí thành công")
             res.status(response.status).json(response)
         } catch (err) {

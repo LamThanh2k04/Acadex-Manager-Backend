@@ -9,6 +9,6 @@ router.get('/getCourseSectionsBySubject/:subjectId/semester/:semesterId',courseS
 router.get('/getScheduleByCourseSection/:courseSectionId',courseSectionController.getScheduleByCourseSection)
 router.post('/registerCourseSection',courseSectionController.registerCourseSection)
 router.post('/cancelCourseSection/:enrollmentId',courseSectionController.cancelCourseSection)
-router.get('/getAllEnrollmentCourseSection',courseSectionController.getAllEnrollmentCourseSection)
+router.get('/getAllEnrollmentCourseSection/:semesterId',courseSectionController.getAllEnrollmentCourseSection)
 router.get('/getAllSchedulesByCourseSectionRegister/:courseSectionId',courseSectionController.getAllSchedulesByCourseSectionRegister)
 export default router
