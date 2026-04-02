@@ -21,7 +21,7 @@ export const paymentController = {
             const response = responseSuccess(data, 'Tạo phiên thanh toán vnpay thành công')
             res.status(response.status).json(response)
         } catch (err) {
-            console.error('Tạo phiên thanh toán vnpay thất bại', err)
+            console.error('Tạo phiên thanh toán vnpay thất bạii', err)
             next(err)
         }
     },
