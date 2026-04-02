@@ -112,7 +112,7 @@ export const paymentSecvice = {
                 }
             })
 
-          
+
             const newPayment = await tx.payment.create({
                 data: {
                     amount: totalAmount,
@@ -130,7 +130,7 @@ export const paymentSecvice = {
             return newPayment
         })
 
-   
+
         const paymentUrl = await vnpay.buildPaymentUrl({
             vnp_Amount: payment.amount,
             vnp_IpAddr: "127.0.0.1",
@@ -145,9 +145,9 @@ export const paymentSecvice = {
     },
     vnpayReturn: async (query) => {
         const paymentId = Number(query.vnp_TxnRef)
-         const frontendUrl = "http://localhost:3000/student/onlinePayment/result"
+        const frontendUrl = "http://localhost:3000/student/onlinePayment/result"
         if (query.vnp_ResponseCode === "00") {
-           
+
             await prisma.payment.update({
                 where: { id: paymentId },
                 data: {
@@ -157,7 +157,7 @@ export const paymentSecvice = {
                     payDate: new Date()
                 }
             })
-            
+
             const relations = await prisma.paymentEnrollment.findMany({
                 where: { paymentId }
             })
@@ -168,9 +168,11 @@ export const paymentSecvice = {
                 where: { id: { in: enrollmentIds } },
                 data: { isPaid: true }
             })
-            return res.redirect(`${frontendUrl}?payment=success`)
+            return {
+                redirectUrl: `${frontendUrl}?payment=success`
+            }
         } else {
-            
+
             await prisma.payment.update({
                 where: { id: paymentId },
                 data: {
@@ -180,7 +182,9 @@ export const paymentSecvice = {
                     payDate: new Date()
                 }
             })
-             return redirect(`${frontendUrl}?payment=failed`);
+            return {
+                redirectUrl: `${frontendUrl}?payment=failed`
+            }
         }
 
     },
@@ -249,9 +253,9 @@ export const paymentSecvice = {
                 }
             }
         })
-        const total = enrollments.reduce((acc,curr) => (
+        const total = enrollments.reduce((acc, curr) => (
             acc + curr.fee
-        ),0)
+        ), 0)
         const result = {}
 
         for (const item of enrollments) {
@@ -271,13 +275,13 @@ export const paymentSecvice = {
             }
 
             result[key].enrollments.push({
-                sectionCode : item.courseSection.sectionCode,
+                sectionCode: item.courseSection.sectionCode,
                 subjectCode: subject.code,
                 subjectName: subject.name,
                 credits: subject.credits,
                 fee: item.fee,
-                status : item.status,
-                 payDate: item.payments[0]?.payment?.payDate || null
+                status: item.status,
+                payDate: item.payments[0]?.payment?.payDate || null
             })
 
             result[key].totalCredits += subject.credits || 0
