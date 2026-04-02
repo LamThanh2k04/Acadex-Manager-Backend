@@ -21,15 +21,14 @@ export const paymentController = {
             const response = responseSuccess(data, 'Tạo phiên thanh toán vnpay thành công')
             res.status(response.status).json(response)
         } catch (err) {
-            console.error('Tạo phiên thanh toán vnpay thất bạii', err)
+            console.error('Tạo phiên thanh toán vnpay thất bại', err)
             next(err)
         }
     },
     vnpayReturn: async (req, res, next) => {
         try {
             const data = await paymentSecvice.vnpayReturn(req.query)
-            const response = responseSuccess(data, 'Xác nhận phiên thanh toán vnpay thành công')
-            res.status(response.status).json(response)
+            return res.redirect(data.redirectUrl)
         } catch (err) {
             console.error('Xác nhận phiên thanh toán vnpay thất bại', err)
             next(err)
