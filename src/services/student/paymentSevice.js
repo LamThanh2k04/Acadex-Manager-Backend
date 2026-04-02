@@ -145,7 +145,7 @@ export const paymentSecvice = {
     },
     vnpayReturn: async (query) => {
         const paymentId = Number(query.vnp_TxnRef)
-
+         const frontendUrl = "http://localhost:3000/student/onlinePayment/result"
         if (query.vnp_ResponseCode === "00") {
            
             await prisma.payment.update({
@@ -157,7 +157,7 @@ export const paymentSecvice = {
                     payDate: new Date()
                 }
             })
-
+            
             const relations = await prisma.paymentEnrollment.findMany({
                 where: { paymentId }
             })
@@ -168,7 +168,7 @@ export const paymentSecvice = {
                 where: { id: { in: enrollmentIds } },
                 data: { isPaid: true }
             })
-            return "Thanh toán thành công"
+            return res.redirect(`${frontendUrl}?payment=success`)
         } else {
             
             await prisma.payment.update({
@@ -180,7 +180,7 @@ export const paymentSecvice = {
                     payDate: new Date()
                 }
             })
-            return "Thanh toán thất bại hoặc đã hủy"
+             return redirect(`${frontendUrl}?payment=failed`);
         }
 
     },
