@@ -5,7 +5,10 @@ let io
 export const initSocket = (server) => {
 
     io = new Server(server, {
-        cors: { origin: "*" }
+        cors: {
+            origin: "http://localhost:3000",
+            credentials: true
+        }
     })
 
     io.on("connection", (socket) => {
@@ -18,7 +21,7 @@ export const initSocket = (server) => {
 
         console.log("connected:", userId)
 
-         socket.on("join-attendance", (sessionId) => {
+        socket.on("join-attendance", (sessionId) => {
             socket.join(`attendance_${sessionId}`)
             console.log(`user ${userId} joined attendance_${sessionId}`)
         })
