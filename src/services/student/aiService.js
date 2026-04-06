@@ -335,7 +335,7 @@ Bạn có thể đóng học phí bằng:
                                 subject: {
                                     name: {
                                         contains: subjectName,
-                                        mode: "insensitive"
+                                      
                                     }
                                 }
                             }
