@@ -164,7 +164,7 @@ export const aiService = {
             }
 
             return {
-                inten: intent,
+                intent: intent,
                 text: aiResult.date
                     ? `Đây là lịch học ngày ${aiResult.date}.`
                     : "Đây là toàn bộ lịch học của bạn.",
@@ -348,14 +348,14 @@ Bạn có thể đóng học phí bằng:
 
             if (grades.length === 0) {
                 return {
-                    inten: intent,
+                    intent: intent,
                     text: "Không tìm thấy điểm phù hợp.",
                     data: []
                 };
             }
 
             return {
-                inten: intent,
+                intent: intent,
                 text: subjectName
                     ? `Đây là điểm môn ${subjectName} của bạn.`
                     : "Đây là toàn bộ điểm của bạn.",
