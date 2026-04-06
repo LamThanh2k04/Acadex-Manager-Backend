@@ -45,7 +45,7 @@ export const aiService = {
     aiMessage: async (user, data) => {
         const { ask } = data;
 
-       
+
         if (!user || user.role !== "STUDENT") {
             return {
                 data: {
@@ -55,7 +55,7 @@ export const aiService = {
             };
         }
 
-      
+
         const student = await prisma.student.findUnique({
             where: { userId: user.id }
         });
@@ -69,7 +69,7 @@ export const aiService = {
             };
         }
 
-        
+
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             temperature: 0,
@@ -116,16 +116,16 @@ export const aiService = {
 
             if (aiResult.date) {
 
-                
+
                 const queryDate = new Date(aiResult.date + "T00:00:00");
 
-                
+
                 const jsDay = queryDate.getDay();
 
-                
+
                 const dbDay = jsDay === 0 ? 8 : jsDay + 1;
 
-                
+
                 const startOfDay = new Date(queryDate);
                 startOfDay.setHours(0, 0, 0, 0);
 
@@ -155,25 +155,23 @@ export const aiService = {
 
             if (schedules.length === 0) {
                 return {
-                    data: {
-                        text: aiResult.date
-                            ? "Không có lịch học vào ngày này."
-                            : "Bạn chưa có lịch học.",
-                        data: []
-                    }
+                    intent: intent,
+                    text: aiResult.date
+                        ? "Không có lịch học vào ngày này."
+                        : "Bạn chưa có lịch học.",
+                    data: []
                 };
             }
 
             return {
-                data: {
-                    text: aiResult.date
-                        ? `Đây là lịch học ngày ${aiResult.date}.`
-                        : "Đây là toàn bộ lịch học của bạn.",
-                    data: schedules
-                }
+                inten: intent,
+                text: aiResult.date
+                    ? `Đây là lịch học ngày ${aiResult.date}.`
+                    : "Đây là toàn bộ lịch học của bạn.",
+                data: schedules
             };
         }
-       
+
         if (intent === "exam") {
 
             let examCondition = {
@@ -221,26 +219,24 @@ export const aiService = {
 
             if (exams.length === 0) {
                 return {
-                    data: {
-                        text: aiResult.date
-                            ? "Không có lịch thi vào ngày này."
-                            : "Bạn chưa có lịch thi.",
-                        data: []
-                    }
+                    intent: intent,
+                    text: aiResult.date
+                        ? "Không có lịch thi vào ngày này."
+                        : "Bạn chưa có lịch thi.",
+                    data: []
                 };
             }
 
             return {
-                data: {
-                    text: aiResult.date
-                        ? `Đây là lịch thi ngày ${aiResult.date}.`
-                        : "Đây là toàn bộ lịch thi của bạn.",
-                    data: exams
-                }
+                intent: intent,
+                text: aiResult.date
+                    ? `Đây là lịch thi ngày ${aiResult.date}.`
+                    : "Đây là toàn bộ lịch thi của bạn.",
+                data: exams
             };
         }
 
-      
+
         if (intent === "tuition") {
 
             const enrollments = await prisma.enrollment.findMany({
@@ -274,10 +270,10 @@ export const aiService = {
 
             if (enrollments.length === 0) {
                 return {
-                    data: {
-                        text: "Không tìm thấy dữ liệu học phí.",
-                        data: []
-                    }
+                    intent: intent,
+                    text: "Không tìm thấy dữ liệu học phí.",
+                    data: []
+
                 };
             }
 
@@ -300,30 +296,27 @@ export const aiService = {
             message += ` là ${total.toLocaleString()} VND.`;
 
             return {
-                data: {
-                    text: message,
-                    data: enrollments
-                }
+                intent: intent,
+                text: message,
+                data: enrollments
             };
         }
 
-       
+
         if (intent === "tuition_guide") {
             return {
-                data: {
-                    text: `
+                intent: intent,
+                text: `
 Bạn có thể đóng học phí bằng:
 
 1. Chuyển khoản ngân hàng (ghi MSSV + Họ tên).
 2. Đóng trực tiếp tại phòng tài chính.
 3. Thanh toán online trên cổng sinh viên.
 `,
-                    data: []
-                }
             };
         }
 
-     
+
         if (intent === "grade") {
             const grades = await prisma.grade.findMany({
                 where: {
@@ -335,7 +328,7 @@ Bạn có thể đóng học phí bằng:
                                 subject: {
                                     name: {
                                         contains: subjectName,
-                                      
+
                                     }
                                 }
                             }
@@ -355,20 +348,19 @@ Bạn có thể đóng học phí bằng:
 
             if (grades.length === 0) {
                 return {
-                    data: {
-                        text: "Không tìm thấy điểm phù hợp.",
-                        data: []
-                    }
+                    inten: intent,
+                    text: "Không tìm thấy điểm phù hợp.",
+                    data: []
                 };
             }
 
             return {
-                data: {
-                    text: subjectName
-                        ? `Đây là điểm môn ${subjectName} của bạn.`
-                        : "Đây là toàn bộ điểm của bạn.",
-                    data: grades
-                }
+                inten: intent,
+                text: subjectName
+                    ? `Đây là điểm môn ${subjectName} của bạn.`
+                    : "Đây là toàn bộ điểm của bạn.",
+                data: grades
+
             };
         }
 
@@ -383,26 +375,18 @@ Bạn có thể đóng học phí bằng:
             });
 
             return {
-                data: {
-                    text: `
-Thông tin của bạn:
-- Họ tên: ${profile.user.fullName}
-- MSSV: ${profile.studentCode}
-- Email: ${profile.user.email}
-- Ngành: ${profile.major?.name}
-- Lớp: ${profile.class?.name}
-`,
-                    data: profile
-                }
+                intent: intent,
+                text: "Đây là thông tin cá nhân của bạn.",
+                data: profile
+
             };
         }
 
-   
+
         return {
-            data: {
-                text: "Xin lỗi, mình chưa hiểu câu hỏi của bạn.",
-                data: []
-            }
+            intent: intent,
+            text: "Xin lỗi, mình chưa hiểu câu hỏi của bạn.",
+            data: []
         };
     }
 };
