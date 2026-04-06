@@ -1,4 +1,4 @@
-import { BadrequestException, NotFoundException } from "../../common/helpers/exception.helper.js"
+import { BadrequestException, NotFoundException, UnauthorizedException } from "../../common/helpers/exception.helper.js"
 import prisma from "../../common/prisma/initPrisma.js"
 import { getIO } from "../../socket/socket.js"
 
