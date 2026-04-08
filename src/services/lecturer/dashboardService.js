@@ -268,7 +268,11 @@ export const dashboardService = {
                 ...(courseSectionId ? {
                     id: Number(courseSectionId)
                 } : {})
-            }
+            },
+             grades : {
+                    isNot : null
+                }
+            
 
         }
         const students = await prisma.enrollment.findMany({
@@ -279,6 +283,7 @@ export const dashboardService = {
                     totalScore: 'desc'
                 }
             },
+            
             select: {
                 student: {
                     select: {

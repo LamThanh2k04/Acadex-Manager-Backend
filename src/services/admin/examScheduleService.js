@@ -124,8 +124,7 @@ export const examScheduleService = {
     createExamSchedule: async (data) => {
         validateMissingFields(data, ['examDate', 'startMinute', 'endMinute', 'courseSectionId', 'roomId'])
         const { examDate, startMinute, endMinute, courseSectionId, roomId, note } = data
-
-        const dayOfWeek = new Date(examDate).getDay()
+        const dayOfWeek = new Date(examDate).getDay() === 0 ? 8 : new Date(examDate).getDay() + 1
         const [courseSection, room] = await Promise.all([
             prisma.courseSection.findUnique({
                 where: { id: Number(courseSectionId) }
@@ -206,11 +205,6 @@ export const examScheduleService = {
         if (!examSchedule) {
             throw new NotFoundException("Không tìm thấy lịch thi này")
         }
-
-        // =============================
-        // 1️⃣ TÍNH GIÁ TRỊ MỚI
-        // =============================
-
         const newExamDate = examDate ? new Date(examDate) : examSchedule.examDate
         const newStart = startMinute !== undefined ? Number(startMinute) : examSchedule.startMinute
         const newEnd = endMinute !== undefined ? Number(endMinute) : examSchedule.endMinute
@@ -220,11 +214,7 @@ export const examScheduleService = {
             throw new BadrequestException("Thời gian kết thúc phải sau thời gian bắt đầu")
         }
 
-        const dayOfWeek = newExamDate.getDay()
-
-        // =============================
-        // 2️⃣ CHECK ROOM (nếu có đổi)
-        // =============================
+        const dayOfWeek = newExamDate.getDay() === 0 ? 8 : newExamDate.getDay() + 1
 
         if (roomId !== undefined) {
             const room = await prisma.room.findUnique({
@@ -236,13 +226,11 @@ export const examScheduleService = {
             }
         }
 
-        // =============================
-        // 3️⃣ CHECK TRÙNG EXAM
-        // =============================
+        
 
         const examConflict = await prisma.examSchedule.findFirst({
             where: {
-                id: { not: Number(examScheduleId) }, // loại trừ chính nó
+                id: { not: Number(examScheduleId) }, 
                 roomId: newRoomId,
                 examDate: newExamDate,
                 startMinute: { lt: newEnd },
@@ -254,9 +242,7 @@ export const examScheduleService = {
             throw new BadrequestException("Phòng đã có lịch thi trong khung giờ này")
         }
 
-        // =============================
-        // 4️⃣ CHECK TRÙNG LỊCH HỌC
-        // =============================
+    
 
         const scheduleConflict = await prisma.schedule.findFirst({
             where: {
@@ -274,9 +260,6 @@ export const examScheduleService = {
             throw new BadrequestException("Phòng đang có lịch học trong khung giờ này")
         }
 
-        // =============================
-        // 5️⃣ UPDATE
-        // =============================
 
         const updateExamScheduleInfo = await prisma.examSchedule.update({
             where: { id: Number(examScheduleId) },
