@@ -124,7 +124,7 @@ export const studentService = {
             })
 
             if (existingEmail) {
-                throw new ConflictException("Email đã tồn tại")
+                throw new ConflictException("Email hệ thống đã tồn tại")
             }
 
             updateUserData.email = email.trim()
@@ -173,10 +173,20 @@ export const studentService = {
             if (!trimmedEmail) {
                 updateStudentData.personalEmail = null
             } else {
-                if (!trimmedEmail.endsWith('@gmail.com')) {
-                    throw new BadrequestException("Email cá nhân phải là gmail")
-                }
+                const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/
 
+                if (!gmailRegex.test(trimmedEmail)) {
+                    throw new BadrequestException("Email cá nhân phải là gmail hợp lệ")
+                }
+                const existingPersonalEmail = await prisma.student.findFirst({
+                    where: {
+                        NOT: { id: Number(student.id) },
+                        personalEmail: trimmedEmail
+                    }
+                })
+                if (existingPersonalEmail) {
+                    throw new ConflictException("Email cá nhân đã tồn tại")
+                }
                 updateStudentData.personalEmail = trimmedEmail
             }
         }
@@ -620,7 +630,7 @@ export const studentService = {
                 }
 
                 results.push({
-                    avatar : student.user.avatar,
+                    avatar: student.user.avatar,
                     studentCode: student.studentCode,
                     fullName: student.user.fullName,
                     semester: sem.semesterName,
