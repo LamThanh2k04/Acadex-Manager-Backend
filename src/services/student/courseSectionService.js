@@ -37,23 +37,20 @@ export const courseSectionSecvice = {
                         }
                     },
                 },
-                OR: [
-                    {
-                        enrollments: {
-                            none: {
-                                studentId: student.id
-                            }
-                        }
-                    },
-                    {
-                        enrollments: {
+                NOT: {
+                    subject: {
+                        courseSections: {
                             some: {
-                                studentId: student.id,
-                                status: "CANCELED"
+                                enrollments: {
+                                    some: {
+                                        studentId: student.id,
+                                        status: "REGISTERED"
+                                    }
+                                }
                             }
                         }
                     }
-                ]
+                }
             },
             distinct: ['subjectId'],
             select: {
@@ -434,7 +431,7 @@ export const courseSectionSecvice = {
             cancelCourseSection
         }
     },
-    getAllEnrollmentCourseSection: async (studentId,semesterId) => {
+    getAllEnrollmentCourseSection: async (studentId, semesterId) => {
         const student = await prisma.student.findUnique({
             where: { userId: Number(studentId) },
             include: {
@@ -452,8 +449,8 @@ export const courseSectionSecvice = {
             where: {
                 studentId: student.id,
                 status: 'REGISTERED',
-                courseSection : {
-                        semesterId : Number(semesterId)
+                courseSection: {
+                    semesterId: Number(semesterId)
                 }
             },
             select: {
