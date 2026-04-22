@@ -46,7 +46,7 @@ export const subjectService = {
             data: {
                 code: code,
                 name: name.trim(),
-                credits: credits,
+                credits: Number(credits),
                 theoryMinutes: theoryMinutes,
                 practiceMinutes: practiceMinutes,
                 countToGpa: countToGpa
