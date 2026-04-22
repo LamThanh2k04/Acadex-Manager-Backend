@@ -14,7 +14,7 @@ export const scheduleService = {
 
         const selectedDate = new Date(date)
 
-        const day = selectedDate.getDay() 
+        const day = selectedDate.getDay()
         const diffToMonday = day === 0 ? -6 : 1 - day
 
         const weekStart = new Date(selectedDate)
@@ -25,37 +25,38 @@ export const scheduleService = {
         weekEnd.setDate(weekStart.getDate() + 6)
         weekEnd.setHours(23, 59, 59, 999)
 
-      
+
         const enrollments = await prisma.enrollment.findMany({
             where: {
                 studentId: student.id,
                 status: "REGISTERED"
             },
             include: {
+
                 courseSection: {
                     include: {
                         subject: true,
                         semester: true,
-                        
+
                         schedules: {
                             where: {
                                 isActive: true,
                                 startDate: { lte: weekEnd },
                                 endDate: { gte: weekStart }
                             },
-                            include : {
-                                room : {
-                                    include : {
-                                        building : true
+                            include: {
+                                room: {
+                                    include: {
+                                        building: true
                                     }
                                 }
                             }
                         },
                         exam: {
-                             include : {
-                                room : {
-                                    include : {
-                                        building : true
+                            include: {
+                                room: {
+                                    include: {
+                                        building: true
                                     }
                                 }
                             }
@@ -72,9 +73,16 @@ export const scheduleService = {
         for (const item of enrollments) {
             const section = item.courseSection
 
-           
+
             for (const schedule of section.schedules) {
+                if (
+                    schedule.type === "PRACTICE" &&
+                    schedule.practiceGroup !== item.practiceGroup
+                ) {
+                    continue
+                }
                 studySchedules.push({
+                    scheduleGroup: schedule.practiceGroup,
                     subjectCode: section.subject.code,
                     subjectName: section.subject.name,
                     semester: section.semester.name,
@@ -89,7 +97,7 @@ export const scheduleService = {
                 })
             }
 
-      
+
             if (
                 section.exam &&
                 section.exam.examDate >= weekStart &&
@@ -108,7 +116,7 @@ export const scheduleService = {
             }
         }
 
-    
+
         if (type === "STUDY") {
             return { weekStart, weekEnd, studySchedules }
         }
