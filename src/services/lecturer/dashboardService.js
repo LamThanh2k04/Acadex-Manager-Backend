@@ -62,6 +62,8 @@ export const dashboardService = {
 
             prisma.enrollment.findMany({
                 where: {
+                    isPaid: true,
+                    status: 'REGISTERED',
                     courseSection: { lecturerId: lecturer.id }
                 },
                 select: { studentId: true },
@@ -128,6 +130,7 @@ export const dashboardService = {
                 ? 0
                 : Math.round((totalPresentAttendance / totalAttendance) * 100)
 
+        console.log(teachingStudentIds,homeroomClasseIds)
         return {
             totalStudents,
             totalClasses,
